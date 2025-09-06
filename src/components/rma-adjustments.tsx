@@ -29,7 +29,7 @@ export default function RmaAdjustments(): JSX.Element {
       <div className="rounded border p-6">
         <h3 className="font-medium mb-1">RMA Adjustments</h3>
         <p className="text-sm text-muted-foreground">
-          No adjustments found. When available, they’ll appear here.
+          No adjustments found. When available, they'll appear here.
         </p>
       </div>
     );

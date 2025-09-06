@@ -1,4 +1,4 @@
-// V17.1.2-p7c — AppShell: theme-token sidebar (semantic colors, unified states)
+// V17.1.2-p5a — unified themed shell + sidebar + footer crumb
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
@@ -42,8 +42,7 @@ export function AppShell({ version, children }:{ version: string; children: Reac
 
   return (
     <div className="min-h-screen grid grid-cols-[260px_1fr]">
-      {/* Sidebar now uses semantic tokens */}
-      <aside className="border-r bg-card">
+      <aside className="border-r bg-white">
         <div className="px-4 py-3 font-semibold">Returns & Finance Operations</div>
         <nav className="px-2 pb-6 space-y-4">
           {groups.map(g => (
@@ -56,9 +55,7 @@ export function AppShell({ version, children }:{ version: string; children: Reac
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`block rounded-md px-3 py-2 text-sm leading-5 transition-colors ${
-                        active ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
-                      }`}
+                      className={`block rounded px-3 py-2 text-sm ${active ? 'bg-blue-600 text-white' : 'hover:bg-muted'}`}
                     >
                       {item.title}
                     </Link>
@@ -86,5 +83,3 @@ export function AppShell({ version, children }:{ version: string; children: Reac
     </div>
   );
 }
-
-export default AppShell;

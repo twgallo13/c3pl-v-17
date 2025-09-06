@@ -16,8 +16,9 @@ export async function fetchRmaAdjustments(): Promise<RmaAdjustment[]> {
   try {
     const res = await fetch('/api/rma/adjustments', { method: 'GET' });
     if (!res.ok) return [];
+
     const json: any = await res.json().catch(() => ({}));
-    const rows = safeArr(json?.items ?? json);
+    const rows = safeArr(json?.items ?? json); // supports {items: []} or []
 
     return rows.map((r: any) => ({
       id: safeStr(r?.id),
