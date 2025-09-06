@@ -2,12 +2,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
-import { AppShell } from '@/components/layout/AppShell-simple';
+import { AppShell } from '@/components/layout/AppShell';
 import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p5b';
+const VERSION = 'V17.1.2-p5a';
 setActiveVersion(VERSION);
 
 function Guarded({ element, roles }: { element: React.ReactElement; roles?: Role[] }) {

@@ -1,4 +1,4 @@
-// V17.1.2-p3f — safe utilities (null/shape guards + formatting)
+// V17.1.2-p5a — safe utilities (null/shape guards + formatting)
 
 export function safeArr<T>(v: T[] | null | undefined): T[] {
   return Array.isArray(v) ? v : [];
