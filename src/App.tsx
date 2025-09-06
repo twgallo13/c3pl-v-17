@@ -35,7 +35,7 @@ function App() {
   
   // Initialize version and guards on mount
   useEffect(() => {
-    setActiveVersion('V17.1.2-p3d');
+    setActiveVersion('V17.1.2-p3f');
     initializeVersionLock();
   }, []);
   
@@ -118,7 +118,7 @@ function App() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.2-p3d</span>
+                      <span className="ml-2 font-mono">V17.1.2-p3f</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Environment:</span>
@@ -385,7 +385,7 @@ function App() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground pt-6 border-t">
-          C3PL V17.1.2-p3d - safe.ts Hermetic Overwrite (Release Mode)
+          C3PL V17.1.2-p3f - Build Clean: Removed stray test files & excluded tests from compilation
         </footer>
         </div>
       </div>
