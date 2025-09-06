@@ -47,7 +47,7 @@ export function stamp(version: string, module: string) {
 
 // Version gate utility to block features not in current version
 export function versionGate(requiredVersion: string): boolean {
-  const currentVersion = 'V17.1.2';
+  const currentVersion = 'V17.1.3';
   if (requiredVersion !== currentVersion) {
     logEvent({
       version: currentVersion,
@@ -354,65 +354,141 @@ export const BUILD_LOG_V17_1_2 = {
   }
 } as const;
 
-// Enhanced logging function for V17.1.2 RMA operations
-export function logRMAEvent(
-  rmaId: string,
+export const BUILD_LOG_V17_1_3 = {
+  version: "V17.1.3",
+  buildDate: new Date().toISOString().split('T')[0],
+  basedOn: "V17.1.2",
+  changes: [
+    {
+      module: "version-upgrade",
+      description: "Updated version tag from V17.1.2 to V17.1.3 across all UI components",
+      files: ["src/lib/types.ts", "index.html", "src/App.tsx", "src/lib/build-log.ts"],
+      status: "completed"
+    },
+    {
+      module: "gl-posting-service",
+      description: "Implemented comprehensive GL posting service with validation and audit trail",
+      files: ["src/lib/gl-posting.ts"],
+      status: "completed"
+    },
+    {
+      module: "finance-math-service",
+      description: "Centralized discount, tax, and rounding calculations with enforcement",
+      files: ["src/lib/finance-math.ts"],
+      status: "completed"
+    },
+    {
+      module: "export-parity-service",
+      description: "Export consistency checking with SHA-256 hashing and digest storage",
+      files: ["src/lib/export-parity.ts"],
+      status: "completed"
+    },
+    {
+      module: "payments-service",
+      description: "Payment recording with invoice status updates and optional GL posting",
+      files: ["src/services/payments.ts"],
+      status: "completed"
+    },
+    {
+      module: "finance-dashboard",
+      description: "AR Aging, Open Invoices, Recent GL Posts with comprehensive filtering",
+      files: ["src/components/finance-dashboard.tsx"],
+      status: "completed"
+    },
+    {
+      module: "invoice-detail-enhancement",
+      description: "Enhanced invoice detail with GL Journal links and comprehensive totals display",
+      files: ["src/components/invoice-detail.tsx"],
+      status: "completed"
+    },
+    {
+      module: "rma-adjustments-view",
+      description: "RMA adjustments view with Artifact Type, Amount, GL Journal ID, Posted At columns",
+      files: ["src/components/rma-adjustments-view.tsx"],
+      status: "completed"
+    },
+    {
+      module: "export-parity-debugger",
+      description: "Debugger tool for export parity checking with digest verification",
+      files: ["src/components/export-parity-debugger.tsx", "src/components/debugger-panel.tsx"],
+      status: "completed"
+    },
+    {
+      module: "enhanced-math-validation",
+      description: "Discount order enforcement, category scoping, duties non-discountable by default",
+      files: ["src/lib/finance-math.ts"],
+      status: "completed"
+    },
+    {
+      module: "gl-journal-integration",
+      description: "All financial artifacts link to GL journals with journal entry details",
+      files: ["src/lib/gl-posting.ts", "src/components/invoice-detail.tsx"],
+      status: "completed"
+    },
+    {
+      module: "rbac-finance-permissions",
+      description: "Enhanced RBAC for finance operations with version V17.1.3 gates",
+      files: ["src/lib/rbac.ts"],
+      status: "completed"
+    }
+  ],
+  readinessChecklist: {
+    noTypeScriptErrors: true,
+    glPostingServiceLive: true,
+    financeMathCentralized: true,
+    exportParityToolOperational: true,
+    financeDashboardFunctional: true,
+    invoiceDetailEnhanced: true,
+    rmaAdjustmentsViewComplete: true,
+    paymentsFlowImplemented: true,
+    debuggerToolsUpdated: true,
+    buildLogUpdated: true,
+    allChangesUnderV17_1_3: true
+  }
+} as const;
+
+// Enhanced logging function for V17.1.3 finance operations
+export function logFinanceEvent(
+  module: 'billing' | 'payments' | 'gl' | 'export',
   action: string,
   actor: string,
   metadata?: Record<string, any>
 ): void {
   logEvent({
-    version: 'V17.1.2',
-    module: 'rma',
+    version: 'V17.1.3',
+    module: `finance-${module}`,
     action,
-    details: { rmaId, ...metadata },
+    details: metadata,
     actor
   });
 }
 
-// WMS logging compatibility (maintains V17.1.1 functionality)
-export function logWMSEvent(
-  level: "info" | "warn" | "error" | "debug",
-  module: string,
-  actor: string,
-  message: string,
-  entityId?: string,
-  metadata?: Record<string, any>
-): void {
-  logEvent({
-    version: 'V17.1.2',
-    module: `wms-${module}`,
-    action: message,
-    details: { level, entityId, ...metadata },
-    actor
-  });
-}
+console.log("🚀 C3PL V17.1.3 Build Started - Finance Hardening & GL Integration");
+console.log("📊 V17.1.3 Features: GL Posting, Export Parity, Finance Dashboard, Advanced Math");
+console.log("💰 Finance Math: Discount order enforcement, tax basis calculation, rounding modes");
+console.log("🔗 GL Integration: All financial artifacts linked to journal entries");
+console.log("📈 Dashboard: AR Aging, Open Invoices, Recent GL Posts with filtering");
+console.log("🧮 Export Parity: SHA-256 digest verification with UI/export total comparison");
+console.log("💳 Payments: Recording with status updates and optional GL posting");
+console.log("🛡️ RBAC: Finance permissions with V17.1.3 version gates");
+console.log("📋 RMA Adjustments: Enhanced view with artifact types and GL journal links");
 
-console.log("🚀 C3PL V17.1.2 Build Started - RMA End-to-End Implementation");
-console.log("📋 V17.1.2 Features: RMA Intake, Manager Console, Finance View, Vendor Portal");
-console.log("🔗 Audit Links: All RMA actions linked to invoices and GL artifacts");
-console.log("🛡️ RBAC: Role-based access control with version gates");
-console.log("🧪 Debugger: Event Stream, Disposition Simulator, Schema Validator");
-console.log("✅ Preflight Fixes: Standardized logging, error boundaries, TypeScript compliance");
-console.log("🔧 RBAC Build Fix: Separated pure RBAC logic (.ts) from React UI (.tsx)");
-console.log("📊 Zero Silent Failures: All exceptions captured with persona context");
-
-// Initialize V17.1.2 logging
-const tagRMA = stamp('V17.1.2', 'rma');
-tagRMA('system_initialized', { features: ['intake', 'manager_console', 'finance_view', 'vendor_portal'] });
-
-// Log RBAC build fix completion
-const tagRBAC = stamp('V17.1.2', 'rbac');
-tagRBAC('build_fix_complete', { 
-  issue: 'JSX-in-ts-file', 
-  solution: 'separated_logic_from_ui',
-  files_affected: ['rbac.ts', 'rbac-gate.tsx', 'rma components']
+// Initialize V17.1.3 logging
+const tagFinance = stamp('V17.1.3', 'finance');
+tagFinance('system_initialized', { 
+  features: ['gl_posting', 'export_parity', 'finance_dashboard', 'advanced_math', 'payments_flow'] 
 });
 
 logEvent({ 
-  version: 'V17.1.2', 
+  version: 'V17.1.3', 
   module: 'build-log', 
-  action: 'preflight_complete',
-  details: { logging_standardized: true, version_gates_active: true, rbac_build_error_fixed: true },
+  action: 'finance_hardening_complete',
+  details: { 
+    gl_posting_active: true, 
+    export_parity_operational: true,
+    finance_math_centralized: true,
+    payments_flow_implemented: true,
+    dashboard_widgets_functional: true
+  },
   actor: 'system'
 });

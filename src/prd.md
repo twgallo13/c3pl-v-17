@@ -1,50 +1,74 @@
-# C3PL V17.0.1 - Product Requirements Document
+# C3PL V17.1.3 - Product Requirements Document
 
 ## Version History
 - **V17.0.0**: Initial release with QA login, role switcher, console output toggle, basic debugger
 - **V17.0.1**: Enhanced with Network Inspector, Schema Validator, and Error Replayer
+- **V17.1.0**: Invoice system with Firestore schema, lifecycle management, export functionality
+- **V17.1.1**: WMS implementation with receiving, wave control, picking, and packout workflows
+- **V17.1.2**: RMA end-to-end with disposition handlers, audit links, and finance integration
+- **V17.1.3**: Finance hardening with GL posting, export parity, advanced math, and dashboard
 
 ## Core Purpose & Success
 
-**Mission Statement**: C3PL is a comprehensive Quality Assurance and debugging tool that enables developers and QA teams to inspect, validate, and replay system interactions with full context and traceability.
+**Mission Statement**: C3PL is a comprehensive financial operations and warehouse management system that provides real-time visibility into invoices, returns, GL journals, and export compliance with enterprise-grade audit trails.
 
 **Success Indicators**: 
-- Zero silent failures - all exceptions logged with full context
-- Complete audit trail of all system interactions
-- Successful schema validation across all modules
-- Reliable error replay for debugging complex issues
+- GL journals balanced and linked to all financial artifacts
+- Export parity validation passing across PDF/CSV/XLSX formats
+- Finance dashboard providing real-time AR aging and GL activity
+- Payment flows updating invoice status with optional GL posting
+- Advanced discount and tax calculations with proper precedence
 
-**Experience Qualities**: Professional, Reliable, Comprehensive
+**Experience Qualities**: Professional, Accurate, Compliant
 
 ## Project Classification & Approach
 
-**Complexity Level**: Complex Application with advanced debugging functionality, schema validation, and error handling
-**Primary User Activity**: Acting and Analyzing - users actively debug, test, and validate system behavior
+**Complexity Level**: Complex Enterprise Application with financial operations, GL integration, export compliance, and advanced business logic
+**Primary User Activity**: Creating, Acting, and Analyzing - users process financial transactions, manage returns, and analyze business data
 
 ## Essential Features
 
-### Core V17.0.0 Features (Maintained)
-1. **Version Display**: Prominent V17.0.1 version tag in main UI and debugger panel
-2. **One-Click QA Login**: Instant authentication with predefined QA account  
-3. **Role Switcher**: Dynamic switching between Vendor, Account Manager, Customer Service, Operations, and Admin roles
-4. **Console Output Toggle**: Enable/disable structured logging with persona context
+### V17.1.3 Finance Features
 
-### New V17.0.1 Features
+#### 1. GL Posting Service
+- **Functionality**: Centralized general ledger posting with validation and audit trail
+- **Purpose**: Ensure all financial transactions are properly recorded with balanced entries
+- **Success Criteria**: All GL entries balanced, journal IDs linked to source documents, validation prevents unbalanced entries
 
-#### 1. Network Request Inspector
-- **Functionality**: Complete visibility into API calls, payloads, response times, and error codes
-- **Purpose**: Debug network issues, monitor API performance, track request/response patterns
-- **Success Criteria**: All network requests captured with full metadata, searchable history, detailed inspection capabilities
+#### 2. Finance Math Service  
+- **Functionality**: Centralized discount, tax, and rounding calculations with enforcement
+- **Purpose**: Consistent financial calculations across all modules with proper precedence
+- **Success Criteria**: Discount order enforced (flat → percent), tax basis calculated after discounts, duties non-discountable
 
-#### 2. Schema Validator
-- **Functionality**: Live validation of Firestore/API payloads against predefined contracts
-- **Purpose**: Ensure data integrity, catch schema mismatches early, prevent data corruption
-- **Success Criteria**: Real-time validation with clear error reporting, support for multiple schema contracts, warnings for unexpected fields
+#### 3. Export Parity Service
+- **Functionality**: Ensures consistency between UI totals and exported file totals with SHA-256 hashing
+- **Purpose**: Prevent discrepancies between displayed and exported financial data
+- **Success Criteria**: UI/export total comparison, digest storage, parity check tool operational
 
-#### 3. Error Replayer
-- **Functionality**: Capture and replay failed actions with complete log history attached
-- **Purpose**: Reproduce bugs reliably, understand failure context, accelerate debugging workflows
-- **Success Criteria**: Accurate error capture, reliable replay mechanism, complete context preservation
+#### 4. Payments Service
+- **Functionality**: Payment recording with invoice status updates and optional GL posting
+- **Purpose**: Complete payment lifecycle from recording to GL integration
+- **Success Criteria**: Invoice status updates to 'paid', optional GL entries balanced, payment history tracking
+
+#### 5. Finance Dashboard
+- **Functionality**: AR Aging, Open Invoices, Recent GL Posts with filtering
+- **Purpose**: Real-time visibility into financial position and activity
+- **Success Criteria**: AR aging by buckets (0-30, 31-60, 61-90, >90 days), filterable GL activity
+
+#### 6. Enhanced Invoice Detail
+- **Functionality**: GL Journal links and comprehensive totals display
+- **Purpose**: Complete financial artifact traceability and audit capability
+- **Success Criteria**: GL journal drawer with entries, enhanced totals (Before → After Discounts → Taxes → Grand Total)
+
+#### 7. RMA Adjustments View
+- **Functionality**: Financial adjustments from RMA processing with GL links
+- **Purpose**: Visibility into all RMA-generated financial artifacts
+- **Success Criteria**: Artifact type, amount, GL journal ID, posted date columns
+
+#### 8. Export Parity Debugger
+- **Functionality**: Compare UI totals to export totals with digest verification
+- **Purpose**: Debug and validate export consistency during development
+- **Success Criteria**: Format-specific comparison, digest display, discrepancy identification
 
 ## Design Direction
 

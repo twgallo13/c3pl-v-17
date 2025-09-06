@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileText, Download, Eye, Shield } from "@phosphor-icons/react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { ArrowLeft, FileText, Download, Eye, Shield, ExternalLink, Receipt } from "@phosphor-icons/react";
 import { Invoice, UserRole, InvoiceNote } from "@/lib/types";
 import { invoiceService } from "@/lib/invoice-service";
-import { logEvent } from "@/lib/build-log";
+import { logEvent, stamp } from "@/lib/build-log";
+
+const tag = stamp('V17.1.3', 'invoice-detail');
 
 interface InvoiceDetailProps {
   invoice: Invoice;
@@ -54,9 +57,17 @@ export function InvoiceDetail({ invoice, userRole, onBack }: InvoiceDetailProps)
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      logEvent("info", "Invoice Detail", "system", `Exported invoice ${invoice.invoiceNumber} as ${format}`);
+      tag('invoice_exported', { 
+        invoiceId: invoice.id, 
+        format, 
+        userRole 
+      });
     } catch (error) {
-      logEvent("error", "Invoice Detail", "system", `Failed to export invoice: ${error}`);
+      tag('export_failed', { 
+        invoiceId: invoice.id, 
+        format, 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   };
 
@@ -68,11 +79,113 @@ export function InvoiceDetail({ invoice, userRole, onBack }: InvoiceDetailProps)
         ? "All export formats have matching totals" 
         : "Export format discrepancies detected";
       
-      logEvent(allMatch ? "info" : "warn", "Invoice Detail", "system", message);
+      tag('export_parity_checked', { 
+        invoiceId: invoice.id, 
+        allMatch, 
+        resultsCount: results.length 
+      });
       alert(message); // In production, use a proper toast/notification system
     } catch (error) {
-      logEvent("error", "Invoice Detail", "system", `Failed to check export parity: ${error}`);
+      tag('export_parity_failed', { 
+        invoiceId: invoice.id, 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
+  };
+
+  // Mock GL Journal data (in real app, would fetch from API)
+  const getGLJournalData = () => {
+    if (!invoice.glJournalId) return null;
+    
+    return {
+      journalId: invoice.glJournalId,
+      postedAt: invoice.issuedDate + 'T10:00:00Z',
+      postedBy: 'system',
+      entries: [
+        {
+          account: '1200',
+          accountName: 'Accounts Receivable',
+          debit: invoice.grandTotal,
+          credit: 0,
+          memo: `Invoice ${invoice.invoiceNumber} - ${invoice.client.name}`
+        },
+        {
+          account: '4000',
+          accountName: 'Revenue',
+          debit: 0,
+          credit: invoice.grandTotal,
+          memo: `Invoice ${invoice.invoiceNumber} - ${invoice.client.name}`
+        }
+      ]
+    };
+  };
+
+  const renderGLJournalDrawer = () => {
+    const journalData = getGLJournalData();
+    if (!journalData) return null;
+
+    return (
+      <Drawer>
+        <DrawerTrigger asChild>
+          <Button variant="outline" size="sm">
+            <ExternalLink className="h-4 w-4 mr-2" />
+            View GL Journal
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>GL Journal Entry - {journalData.journalId}</DrawerTitle>
+          </DrawerHeader>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium">Posted At:</span>
+                <span className="ml-2">{formatDate(journalData.postedAt)}</span>
+              </div>
+              <div>
+                <span className="font-medium">Posted By:</span>
+                <span className="ml-2">{journalData.postedBy}</span>
+              </div>
+            </div>
+            
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Account</TableHead>
+                  <TableHead>Account Name</TableHead>
+                  <TableHead className="text-right">Debit</TableHead>
+                  <TableHead className="text-right">Credit</TableHead>
+                  <TableHead>Memo</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {journalData.entries.map((entry, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-mono">{entry.account}</TableCell>
+                    <TableCell>{entry.accountName}</TableCell>
+                    <TableCell className="text-right">
+                      {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{entry.memo}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            
+            <div className="flex justify-between pt-4 border-t">
+              <span className="font-medium">Totals:</span>
+              <div className="space-x-4">
+                <span>Debits: {formatCurrency(journalData.entries.reduce((sum, e) => sum + e.debit, 0))}</span>
+                <span>Credits: {formatCurrency(journalData.entries.reduce((sum, e) => sum + e.credit, 0))}</span>
+              </div>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
   };
 
   const canModify = userRole === "Finance" || userRole === "Admin";
@@ -152,34 +265,63 @@ export function InvoiceDetail({ invoice, userRole, onBack }: InvoiceDetailProps)
               </CardContent>
             </Card>
 
-            {/* Totals Block */}
+            {/* Enhanced Totals Block */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Totals</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Receipt className="h-5 w-5" />
+                  Invoice Totals
+                  {invoice.glJournalId && (
+                    <Badge variant="outline" className="text-xs">
+                      GL Posted
+                    </Badge>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal:</span>
-                    <span>{formatCurrency(invoice.totals.subtotal)}</span>
+                    <span className="text-muted-foreground">Before Discounts:</span>
+                    <span>{formatCurrency(invoice.subtotal)}</span>
                   </div>
                   
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Discounts:</span>
-                    <span className="text-green-600">-{formatCurrency(invoice.totals.discounts)}</span>
-                  </div>
+                  {invoice.discountAmount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Discounts:</span>
+                      <span className="text-green-600">-{formatCurrency(invoice.discountAmount)}</span>
+                    </div>
+                  )}
                   
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Taxes:</span>
-                    <span>{formatCurrency(invoice.totals.taxes)}</span>
+                    <span className="text-muted-foreground">After Discounts:</span>
+                    <span>{formatCurrency(invoice.afterDiscounts)}</span>
                   </div>
+                  
+                  {invoice.taxAmount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Taxes:</span>
+                      <span>{formatCurrency(invoice.taxAmount)}</span>
+                    </div>
+                  )}
                   
                   <hr />
                   
                   <div className="flex justify-between font-semibold">
                     <span>Grand Total:</span>
-                    <span className="text-lg">{formatCurrency(invoice.totals.grandTotal)}</span>
+                    <span className="text-lg">{formatCurrency(invoice.grandTotal)}</span>
                   </div>
+                  
+                  {invoice.glJournalId && (
+                    <div className="pt-3 border-t">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">GL Journal ID:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs">{invoice.glJournalId}</span>
+                          {renderGLJournalDrawer()}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

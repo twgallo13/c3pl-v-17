@@ -16,6 +16,7 @@ import { NetworkInspector } from "./network-inspector";
 import { SchemaValidator } from "./schema-validator";
 import { ErrorReplayer } from "./error-replayer";
 import { ExportParityChecker } from "./export-parity-checker";
+import { ExportParityDebugger } from "./export-parity-debugger";
 import { WMSAuditExplorer } from "./wms-audit-explorer";
 import { WaveSimulationTool } from "./wave-simulation-tool";
 import { RMAEventStream } from "./rma-event-stream";
@@ -111,6 +112,10 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
             <TabsTrigger value="invoices">
               <Receipt size={14} className="mr-1" />
               Invoices
+            </TabsTrigger>
+            <TabsTrigger value="export-parity">
+              <FileText size={14} className="mr-1" />
+              Export Parity
             </TabsTrigger>
             <TabsTrigger value="rma-events">
               <RotateCcw size={14} className="mr-1" />
@@ -235,6 +240,10 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
 
           <TabsContent value="invoices">
             <ExportParityChecker />
+          </TabsContent>
+
+          <TabsContent value="export-parity">
+            <ExportParityDebugger />
           </TabsContent>
 
           <TabsContent value="rma-events">
