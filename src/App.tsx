@@ -39,6 +39,19 @@ export default function App() {
           <Routes>
             {/* Role-based landing for "/" */}
             <Route path="/" element={<Navigate to={landingFor(role)} replace />} />
+            <Route
+              path="/products"
+              element={<ProductsView />}
+            />
+            <Route
+              path="/products/:id"
+              element={
+                <Guarded
+                  roles={['Admin', 'Finance', 'Operations', 'CustomerService']}
+                  element={<ProductDetail />}
+                />
+              }
+            />
             {ROUTES.map((r) => (
               <Route
                 key={r.path}
