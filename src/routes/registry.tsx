@@ -1,4 +1,4 @@
-// V17.1.2-p4a — explicit route registry (compile fix)
+// V17.1.2-p4b — explicit route registry (compile repair)
 
 import React from 'react';
 import type { Role } from '@/lib/role-store';
@@ -14,15 +14,15 @@ export type RouteDef = {
   component: React.LazyExoticComponent<React.ComponentType<any>>;
 };
 
-// Lazy pages that already exist in the app
+// Lazy pages that already exist
 const FinanceDashboard = React.lazy(() => import('@/components/finance-dashboard'));
-const RmaAdjustments   = React.lazy(() => import('@/components/rma-adjustments-view'));
+const RmaAdjustments   = React.lazy(() => import('@/components/rma-adjustments'));
 const TransitionChecklist = React.lazy(() => import('@/components/transition-checklist'));
 
 // NOTE: No Debugger route here (kept out of the registry for release builds)
 
 export const ROUTES: RouteDef[] = [
-  // Make Finance the temporary home (we can swap to a DashboardsHome component later)
+  // Temporary home is Finance (we can switch to a DashboardsHome later)
   { path: '/',                title: 'Finance Dashboard', workflow: 'Finance', roles: ['Finance','Admin'], visible: true, component: FinanceDashboard },
   { path: '/finance',         title: 'Finance Dashboard', workflow: 'Finance', roles: ['Finance','Admin'], visible: true, component: FinanceDashboard },
   { path: '/rma/adjustments', title: 'RMA Adjustments',   workflow: 'RMA',     roles: ['Operations','Admin'], visible: true, component: RmaAdjustments },
