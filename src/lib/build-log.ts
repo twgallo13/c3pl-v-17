@@ -1,12 +1,13 @@
 /**
- * C3PL V17.1.2-p4a Build Log - Standardized Logging System
+ * C3PL V17.1.2-p4b Build Log - Standardized Logging System
  * V17.1.2-p4: Theme & Navigation Lock - Registry-driven routing, Debugger removed from shell, Dashboards Home landing
  * V17.1.2-p4a: Registry compile fix - Clean route registry, fixed truncated imports, removed Debugger routes
+ * V17.1.2-p4b: Registry import path fix - Updated RMA adjustments import path to match actual file
  * All changes and implementations tied to this version
  * Zero default exports - named exports only for forward compatibility
  */
 
-// V17.1.2-p4a — build log utilities (standardized named exports)
+// V17.1.2-p4b — build log utilities (standardized named exports)
 export type BuildLogEvent = {
   version: string;    // e.g., "V17.1.2"
   module: string;     // e.g., "rma", "billing", "wms"  
