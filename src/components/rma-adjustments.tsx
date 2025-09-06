@@ -1,4 +1,4 @@
-// V17.1.2-p7c — RMA Adjustments (reads adapter; safe loading/empty states)
+// V17.1.2-rma-sync-hotfix — RMA Adjustments (adapter only; safe states)
 import React from 'react';
 import { fmtCurrency, safeNum, safeStr } from '@/lib/safe';
 import { fetchRmaAdjustments, type RmaAdjustment } from '@/lib/rma-api';

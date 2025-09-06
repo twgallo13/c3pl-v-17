@@ -1,4 +1,4 @@
-// V17.1.2-p7e-fix3 — RMA Adjustments data adapter (flagged, null-safe)
+// V17.1.2-rma-sync-hotfix — RMA Adjustments data adapter (flagged, null-safe)
 import { safeArr, safeNum, safeStr } from '@/lib/safe';
 
 export type RmaAdjustment = {
@@ -15,13 +15,10 @@ export async function fetchRmaAdjustments(): Promise<RmaAdjustment[]> {
 
   try {
     const res = await fetch('/api/rma/adjustments', { method: 'GET' });
-    if (!res.ok) {
-      console.warn('V17.1.2-p7e-fix3 rma adapter: non-OK', res.status);
-      return [];
-    }
+    if (!res.ok) return [];
 
     const json: any = await res.json().catch(() => ({}));
-    const rows = safeArr(json?.items ?? json); // support {items: []} or []
+    const rows = safeArr(json?.items ?? json); // supports {items: []} or []
 
     return rows.map((r: any) => ({
       id: safeStr(r?.id),
@@ -30,8 +27,7 @@ export async function fetchRmaAdjustments(): Promise<RmaAdjustment[]> {
       gl_journal_id: r?.gl_journal_id != null ? String(r.gl_journal_id) : null,
       posted_at: r?.posted_at != null ? String(r.posted_at) : null,
     }));
-  } catch (e) {
-    console.error('V17.1.2-p7e-fix3 rma adapter error:', e);
+  } catch {
     return [];
   }
 }
