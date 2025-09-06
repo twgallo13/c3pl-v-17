@@ -1,10 +1,9 @@
-// V17.1.2-p4c — unified themed shell + sidebar
+// V17.1.2-p4d — unified themed shell + sidebar (no external role switcher import)
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
 import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
-import { HeaderRoleSwitcher } from '@/components/header/role-switcher';
 
 type Group = { name: string; items: { path: string; title: string; roles?: Role[] }[] };
 
@@ -15,12 +14,10 @@ function groupRoutesByWorkflow(role: Role): Group[] {
     const allowed = checkAccess([role], r.roles ?? []).allowed;
     if (!allowed) continue;
     if (!groups[r.workflow]) groups[r.workflow] = { name: r.workflow, items: [] };
-    // prevent duplicate entries by path
     if (!groups[r.workflow].items.some(i => i.path === r.path)) {
       groups[r.workflow].items.push({ path: r.path, title: r.title, roles: r.roles });
     }
   }
-  // stable order: Dashboards, Finance, RMA, Sales, Admin
   const order = ['Dashboards','Finance','RMA','Sales','Admin'];
   return Object.values(groups).sort((a,b)=> order.indexOf(a.name)-order.indexOf(b.name));
 }
@@ -46,11 +43,8 @@ export function AppShell({ version, children }:{ version: string; children: Reac
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={
-                        `block rounded px-3 py-2 text-sm ${active
-                          ? 'bg-blue-600 text-white'
-                          : 'hover:bg-muted'}`
-                      }>
+                      className={`block rounded px-3 py-2 text-sm ${active ? 'bg-blue-600 text-white' : 'hover:bg-muted'}`}
+                    >
                       {item.title}
                     </Link>
                   );
@@ -65,11 +59,8 @@ export function AppShell({ version, children }:{ version: string; children: Reac
         <header className="flex items-center justify-between border-b px-4 py-3">
           <div className="font-semibold">C3PL</div>
           <div className="flex items-center gap-3">
-            <div className="text-xs px-2 py-1 rounded bg-muted">{version}</div>
-            <div className="text-sm text-muted-foreground">
-              Role: <span className="font-medium text-foreground">{role}</span>
-            </div>
-            <HeaderRoleSwitcher />
+            <span className="text-xs px-2 py-1 rounded bg-muted">{version}</span>
+            <span className="text-xs text-muted-foreground">Role: {role}</span>
           </div>
         </header>
         <div className="p-4 max-w-6xl mx-auto">{children}</div>
@@ -77,3 +68,5 @@ export function AppShell({ version, children }:{ version: string; children: Reac
     </div>
   );
 }
+
+export default AppShell;
