@@ -846,6 +846,20 @@ logEvent({
   actor: 'system'
 });
 
+logEvent({ 
+  version: 'V17.1.2-p2', 
+  module: 'build-log', 
+  action: 'safe_ts_syntax_fix_complete',
+  details: { 
+    issue_resolved: 'stray top-level return statements in src/lib/safe.ts eliminated',
+    utilities_implemented: 'safeArr, safeNum, safeStr, fmtCurrency functions',
+    build_error_eliminated: 'Return statement is not allowed here no longer appears',
+    typescript_clean: true,
+    forward_compatibility: 'Finance/RMA UIs can safely use safe utilities'
+  },
+  actor: 'system'
+});
+
 // Enhanced logging function for V17.1.4 payments operations
 export function logPaymentsEvent(
   module: 'payments' | 'reconciliation' | 'dunning' | 'remittance',
