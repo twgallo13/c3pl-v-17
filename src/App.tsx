@@ -9,7 +9,7 @@ import { setActiveVersion } from '@/lib/version';
 
 const ProductsView = React.lazy(() => import('@/components/products-view'));
 
-const VERSION = 'V17.1.2-p8';
+const VERSION = 'V17.1.2-p8a';
 setActiveVersion(VERSION);
 
 function landingFor(role: Role): string {
