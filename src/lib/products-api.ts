@@ -1,4 +1,4 @@
-// V17.1.2-p8 — Products API (flagged, empty-safe)
+// V17.1.2-p8b — add fetchProduct(id) detail reader
 import { safeArr, safeNum, safeStr } from '@/lib/safe';
 
 export type ProductLite = {
@@ -7,6 +7,12 @@ export type ProductLite = {
   description?: string;
   size_class?: 'Small' | 'Medium' | 'Large' | string;
   rate_monthly_storage?: number;
+};
+
+export type ProductDetail = ProductLite & {
+  attributes?: Record<string, unknown> | null;
+  assigned_rates?: Record<string, number> | null;
+  vendor?: string | null;
 };
 
 export async function fetchProducts(): Promise<ProductLite[]> {
@@ -27,5 +33,28 @@ export async function fetchProducts(): Promise<ProductLite[]> {
     }));
   } catch {
     return [];
+  }
+}
+
+export async function fetchProduct(id: string): Promise<ProductDetail | null> {
+  const useApi = (import.meta as any).env?.VITE_PRODUCTS_API === '1';
+  if (!useApi) return null;
+  try {
+    const res = await fetch(`/api/products/${encodeURIComponent(id)}`, { method: 'GET' });
+    if (!res.ok) return null;
+    const r: any = await res.json().catch(() => null);
+    if (!r) return null;
+    return {
+      id: safeStr(r?.id || r?.sku || id),
+      sku: safeStr(r?.sku || id),
+      description: safeStr(r?.description ?? ''),
+      size_class: safeStr(r?.size_class ?? ''),
+      rate_monthly_storage: safeNum(r?.rate_monthly_storage, 0),
+      attributes: r?.attributes ?? null,
+      assigned_rates: r?.assigned_rates ?? null,
+      vendor: r?.vendor ? String(r.vendor) : null,
+    };
+  } catch {
+    return null;
   }
 }

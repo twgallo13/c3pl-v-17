@@ -38,7 +38,11 @@ export default function ProductsView(): JSX.Element {
             <tbody>
               {rows.map((p) => (
                 <tr key={p.id} className="border-b last:border-0">
-                  <td className="py-2 pr-3 font-medium">{safeStr(p.sku)}</td>
+                  <td className="py-2 pr-3 font-medium">
+                    <a href={`/products/${encodeURIComponent(p.id)}`} className="underline">
+                      {safeStr(p.sku)}
+                    </a>
+                  </td>
                   <td className="py-2 pr-3">{safeStr(p.description ?? '')}</td>
                   <td className="py-2 pr-3">{safeStr(p.size_class ?? '')}</td>
                   <td className="py-2">{fmtCurrency(safeNum(p.rate_monthly_storage, 0))}</td>

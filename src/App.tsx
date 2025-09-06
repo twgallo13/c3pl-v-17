@@ -8,8 +8,9 @@ import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
 const ProductsView = React.lazy(() => import('@/components/products-view'));
+const ProductDetail = React.lazy(() => import('@/components/product-detail'));
 
-const VERSION = 'V17.1.2-p8a';
+const VERSION = 'V17.1.2-p8b';
 setActiveVersion(VERSION);
 
 function landingFor(role: Role): string {
@@ -44,6 +45,15 @@ export default function App() {
             <Route
               path="/products"
               element={<ProductsView />}
+            />
+            <Route
+              path="/products/:id"
+              element={
+                <Guarded
+                  roles={['Admin', 'Finance', 'Operations', 'CustomerService']}
+                  element={<ProductDetail />}
+                />
+              }
             />
             {ROUTES.map((r) => (
               <Route
