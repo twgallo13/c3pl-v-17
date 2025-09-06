@@ -1,18 +1,18 @@
 // V17.1.2-p4 — explicit route registry
-import React from 'react';
-import type { Role } from '@/lib/role-store';
-import type { VersionTag } from '@/lib/version';
-import { allowDebug } from '@/lib/feature-flags';
-
+import type { Role } from 
+import { allowDebug } from '@/lib/feature-fla
 export type RouteDef = {
-  path: string;
   title: string;
-  workflow: 'Dashboards'|'Finance'|'RMA'|'Sales'|'Admin';
-  roles?: Role[];
-  version?: VersionTag;
-  visible?: boolean; // sidebar visibility
-  component: React.LazyExoticComponent<React.ComponentType<any>>;
+
+  visible?: boolean; // 
 };
+const Dashboards
+const RmaAdjustments = React.lazy(() => import('@/compone
+const QuoteGenera
+
+const TransitionChecklist = React.lazy(() 
+// Debugger route only included if allowDebug() === true
+
 
 const DashboardsHome = React.lazy(() => import('@/components/dashboards/home'));
 const FinanceDashboard = React.lazy(() => import('@/components/finance-dashboard'));
@@ -36,4 +36,3 @@ export const ROUTES: RouteDef[] = [
   { path: '/admin/benchmarks', title: 'Benchmarks Import', workflow: 'Admin', roles: ['Admin'], visible: true, component: BenchmarksImport },
   { path: '/admin/transition', title: 'Transition Checklist', workflow: 'Admin', roles: ['Admin'], visible: false, component: TransitionChecklist },
   ...(allowDebug() ? [{ path: '/admin/debug', title: 'Debugger', workflow: 'Admin', roles: ['Admin'], visible: false, component: DebuggerPanel } as RouteDef] : [])
-];
