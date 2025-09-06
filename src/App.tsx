@@ -1,4 +1,4 @@
-// V17.1.2-p5 — router uses registry; '/' redirects to '/dashboards'
+// V17.1.2-p5a — router uses registry; '/' redirects to '/dashboards'
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
@@ -7,10 +7,10 @@ import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p5';
+const VERSION = 'V17.1.2-p5a';
 setActiveVersion(VERSION);
 
-function Guarded({ element, roles }: { element: React.ReactElement; roles?: Role[] }) {
+function Guarded({ element, roles }: { element: JSX.Element; roles?: Role[] }) {
   const [role, setRole] = React.useState<Role>(getRole());
   React.useEffect(() => subscribe(setRole), []);
   const access = checkAccess([role], roles ?? []);
