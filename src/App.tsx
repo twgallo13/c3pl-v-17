@@ -7,7 +7,9 @@ import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-rma-sync-hotfix';
+const ProductsView = React.lazy(() => import('@/components/products-view'));
+
+const VERSION = 'V17.1.2-p8';
 setActiveVersion(VERSION);
 
 function landingFor(role: Role): string {
@@ -39,6 +41,10 @@ export default function App() {
           <Routes>
             {/* Role-based landing for "/" */}
             <Route path="/" element={<Navigate to={landingFor(role)} replace />} />
+            <Route
+              path="/products"
+              element={<ProductsView />}
+            />
             {ROUTES.map((r) => (
               <Route
                 key={r.path}
