@@ -1,10 +1,9 @@
-// V17.1.2-p5 — unified themed shell + sidebar (with footer crumb)
+// V17.1.2-p7c — AppShell: theme-token sidebar (semantic colors, unified states)
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
 import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
-import FooterCrumb from '@/components/layout/FooterCrumb';
 
 type Group = { name: string; items: { path: string; title: string; roles?: Role[] }[] };
 
@@ -23,6 +22,18 @@ function groupRoutesByWorkflow(role: Role): Group[] {
   return Object.values(groups).sort((a,b)=> order.indexOf(a.name)-order.indexOf(b.name));
 }
 
+function FooterCrumb({ version }: { version: string }) {
+  const { pathname } = useLocation();
+  const r = ROUTES.find(x => x.path === pathname) || null;
+  const workflow = r?.workflow ?? 'Unknown';
+  const routePath = r?.path ?? pathname;
+  return (
+    <div className="mt-6 pt-3 border-t text-xs text-muted-foreground">
+      {workflow} • {routePath} • {version}
+    </div>
+  );
+}
+
 export function AppShell({ version, children }:{ version: string; children: React.ReactNode }) {
   const [role, setRole] = React.useState<Role>(getRole());
   React.useEffect(() => subscribe(setRole), []);
@@ -31,7 +42,8 @@ export function AppShell({ version, children }:{ version: string; children: Reac
 
   return (
     <div className="min-h-screen grid grid-cols-[260px_1fr]">
-      <aside className="border-r bg-white">
+      {/* Sidebar now uses semantic tokens */}
+      <aside className="border-r bg-card">
         <div className="px-4 py-3 font-semibold">Returns & Finance Operations</div>
         <nav className="px-2 pb-6 space-y-4">
           {groups.map(g => (
@@ -44,7 +56,9 @@ export function AppShell({ version, children }:{ version: string; children: Reac
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`block rounded px-3 py-2 text-sm ${active ? 'bg-blue-600 text-white' : 'hover:bg-muted'}`}
+                      className={`block rounded-md px-3 py-2 text-sm leading-5 transition-colors ${
+                        active ? 'bg-accent text-accent-foreground' : 'hover:bg-accent'
+                      }`}
                     >
                       {item.title}
                     </Link>
@@ -64,8 +78,10 @@ export function AppShell({ version, children }:{ version: string; children: Reac
             <span className="text-xs text-muted-foreground">Role: {role}</span>
           </div>
         </header>
-        <div className="p-4 max-w-6xl mx-auto">{children}</div>
-        <div className="p-4 max-w-6xl mx-auto"><FooterCrumb /></div>
+        <div className="p-4 max-w-6xl mx-auto">
+          {children}
+          <FooterCrumb version={version} />
+        </div>
       </main>
     </div>
   );

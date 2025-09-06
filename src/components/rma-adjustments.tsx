@@ -1,26 +1,35 @@
-// V17.1.2-p5c — RMA Adjustments (compile-stable minimal view)
+// V17.1.2-p7c — RMA Adjustments (reads adapter; safe loading/empty states)
 import React from 'react';
 import { fmtCurrency, safeNum, safeStr } from '@/lib/safe';
-
-type RmaAdjustment = {
-  id: string;
-  artifact_type?: string;
-  amount?: number;
-  gl_journal_id?: string | null;
-  posted_at?: string | null;
-};
-
-const MOCK_ROWS: RmaAdjustment[] = [];
+import { fetchRmaAdjustments, type RmaAdjustment } from '@/lib/rma-api';
 
 export default function RmaAdjustments(): JSX.Element {
-  const rows: RmaAdjustment[] = MOCK_ROWS; // placeholder until API is wired
+  const [loading, setLoading] = React.useState(true);
+  const [rows, setRows] = React.useState<RmaAdjustment[]>([]);
+
+  React.useEffect(() => {
+    (async () => {
+      const data = await fetchRmaAdjustments();
+      setRows(Array.isArray(data) ? data : []);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="rounded border p-6">
+        <h3 className="font-medium mb-1">RMA Adjustments</h3>
+        <p className="text-sm text-muted-foreground">Loading adjustments…</p>
+      </div>
+    );
+  }
 
   if (!rows.length) {
     return (
       <div className="rounded border p-6">
         <h3 className="font-medium mb-1">RMA Adjustments</h3>
         <p className="text-sm text-muted-foreground">
-          No adjustments found. When available, they’ll appear here.
+          No adjustments found. When available, they'll appear here.
         </p>
       </div>
     );
