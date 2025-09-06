@@ -1,5 +1,8 @@
 import { Invoice, InvoiceStatus, InvoiceLifecycleEvent, ExportParityResult, UserRole } from "./types";
-import { logEvent } from "./build-log";
+import { logEvent, stamp } from "./build-log";
+
+// Pre-stamp version + module for consistent billing logs
+const tagBilling = stamp('V17.1.0', 'billing');
 
 // Mock Firestore service for invoice operations
 export class InvoiceService {
