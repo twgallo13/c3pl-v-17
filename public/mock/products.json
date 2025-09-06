@@ -1,0 +1,29 @@
+[
+  {
+    "id": "SKU-ACC-001",
+    "sku": "ACC-001",
+    "description": "Accessory Pouch — Black",
+    "size_class": "Small",
+    "rate_monthly_storage": 0.15,
+    "assigned_rates": { "receiving": 0.05, "fulfillment": 0.35, "storage": 0.15 },
+    "vendor": "Demo Vendor A"
+  },
+  {
+    "id": "SKU-TSH-010",
+    "sku": "TSH-010",
+    "description": "T-Shirt — White M",
+    "size_class": "Medium",
+    "rate_monthly_storage": 0.25,
+    "assigned_rates": { "receiving": 0.08, "fulfillment": 0.45, "storage": 0.25 },
+    "vendor": "Demo Vendor B"
+  },
+  {
+    "id": "SKU-SHO-200",
+    "sku": "SHO-200",
+    "description": "Running Shoe — Size 10",
+    "size_class": "Large",
+    "rate_monthly_storage": 0.5,
+    "assigned_rates": { "receiving": 0.12, "fulfillment": 0.75, "storage": 0.5 },
+    "vendor": "Demo Vendor A"
+  }
+]

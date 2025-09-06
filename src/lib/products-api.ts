@@ -1,4 +1,4 @@
-// V17.1.2-p8b — add fetchProduct(id) detail reader
+// V17.1.2-p8e — Products API (adds mock mode via /public/mock/products.json)
 import { safeArr, safeNum, safeStr } from '@/lib/safe';
 
 export type ProductLite = {
@@ -15,11 +15,16 @@ export type ProductDetail = ProductLite & {
   vendor?: string | null;
 };
 
+function isMock() {
+  return ((import.meta as any).env?.VITE_PRODUCTS_API || '').toLowerCase() === 'mock';
+}
+
 export async function fetchProducts(): Promise<ProductLite[]> {
-  const useApi = (import.meta as any).env?.VITE_PRODUCTS_API === '1';
-  if (!useApi) return [];
+  const flag = (import.meta as any).env?.VITE_PRODUCTS_API;
+  if (flag !== '1' && !isMock()) return [];
   try {
-    const res = await fetch('/api/products', { method: 'GET' });
+    const url = isMock() ? '/mock/products.json' : '/api/products';
+    const res = await fetch(url, { method: 'GET' });
     if (!res.ok) return [];
     const json: any = await res.json().catch(() => ({}));
     const rows = safeArr(json?.items ?? json);
@@ -37,23 +42,43 @@ export async function fetchProducts(): Promise<ProductLite[]> {
 }
 
 export async function fetchProduct(id: string): Promise<ProductDetail | null> {
-  const useApi = (import.meta as any).env?.VITE_PRODUCTS_API === '1';
-  if (!useApi) return null;
+  const flag = (import.meta as any).env?.VITE_PRODUCTS_API;
+  if (flag !== '1' && !isMock()) return null;
   try {
-    const res = await fetch(`/api/products/${encodeURIComponent(id)}`, { method: 'GET' });
+    const url = isMock() ? '/mock/products.json' : `/api/products/${encodeURIComponent(id)}`;
+    const res = await fetch(url, { method: 'GET' });
     if (!res.ok) return null;
-    const r: any = await res.json().catch(() => null);
-    if (!r) return null;
-    return {
-      id: safeStr(r?.id || r?.sku || id),
-      sku: safeStr(r?.sku || id),
-      description: safeStr(r?.description ?? ''),
-      size_class: safeStr(r?.size_class ?? ''),
-      rate_monthly_storage: safeNum(r?.rate_monthly_storage, 0),
-      attributes: r?.attributes ?? null,
-      assigned_rates: r?.assigned_rates ?? null,
-      vendor: r?.vendor ? String(r.vendor) : null,
-    };
+
+    if (isMock()) {
+      const all: any[] = await res.json().catch(() => []);
+      const r: any = safeArr(all).find(
+        (x) => safeStr(x?.id) === id || safeStr(x?.sku) === id
+      );
+      if (!r) return null;
+      return {
+        id: safeStr(r?.id || r?.sku || id),
+        sku: safeStr(r?.sku || id),
+        description: safeStr(r?.description ?? ''),
+        size_class: safeStr(r?.size_class ?? ''),
+        rate_monthly_storage: safeNum(r?.rate_monthly_storage, 0),
+        attributes: r?.attributes ?? null,
+        assigned_rates: (r?.assigned_rates as Record<string, number>) ?? null,
+        vendor: r?.vendor ? String(r.vendor) : null,
+      };
+    } else {
+      const r: any = await res.json().catch(() => null);
+      if (!r) return null;
+      return {
+        id: safeStr(r?.id || r?.sku || id),
+        sku: safeStr(r?.sku || id),
+        description: safeStr(r?.description ?? ''),
+        size_class: safeStr(r?.size_class ?? ''),
+        rate_monthly_storage: safeNum(r?.rate_monthly_storage, 0),
+        attributes: r?.attributes ?? null,
+        assigned_rates: r?.assigned_rates ?? null,
+        vendor: r?.vendor ? String(r.vendor) : null,
+      };
+    }
   } catch {
     return null;
   }
