@@ -12,7 +12,7 @@ type InvoiceLite = {
   gl_journal_id?: string | null;
 };
 
-const tag = stamp('V17.1.2-p4e', 'finance');
+const tag = stamp('V17.1.2-p5a', 'finance');
 
 async function loadFinance(): Promise<{ invoices: InvoiceLite[] }> {
   try {
@@ -29,7 +29,7 @@ async function loadFinance(): Promise<{ invoices: InvoiceLite[] }> {
     return { invoices: mapped };
   } catch (e) {
     // Network or 500 — treat as empty and log, but NEVER throw
-    logEvent({ version: 'V17.1.2-p4e', module: 'finance', action: 'dashboard_load_error', details: { message: String(e) } });
+    logEvent({ version: 'V17.1.2-p5a', module: 'finance', action: 'dashboard_load_error', details: { message: String(e) } });
     return { invoices: [] };
   }
 }

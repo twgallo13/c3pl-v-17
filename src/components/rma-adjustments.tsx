@@ -12,7 +12,7 @@ type RmaAdjustment = {
   posted_at?: string | null;
 };
 
-const tag = stamp('V17.1.2-p4h', 'rma');
+const tag = stamp('V17.1.2-p5a', 'rma');
 
 async function fetchAdjustments(): Promise<RmaAdjustment[]> {
   try {
@@ -34,7 +34,7 @@ async function fetchAdjustments(): Promise<RmaAdjustment[]> {
     }));
   } catch (e) {
     logEvent({
-      version: 'V17.1.2-p4h',
+      version: 'V17.1.2-p5a',
       module: 'rma',
       action: 'adjustments_load_error',
       details: { message: String(e) },
