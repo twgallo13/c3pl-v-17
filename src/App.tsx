@@ -1,18 +1,20 @@
-// V17.1.2-p9a — router uses registry; '/' redirects to '/dashboards'
+// V17.1.2-p6d — router uses registry; '/' -> '/dashboards'
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
-import { AppShell } from '@/components/layout/AppShell';
+import AppShell from '@/components/layout/AppShell';
 import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p6b';
+const VERSION = 'V17.1.2-p6d';
 setActiveVersion(VERSION);
 
-function Guarded({ element, roles }: { element: React.ReactElement; roles?: Role[] }) {
-  // Simplified - just render the element for now
-  return element;
+function Guarded(props: { element: JSX.Element; roles?: Role[] }) {
+  const [role, setRole] = React.useState<Role>(getRole());
+  React.useEffect(() => subscribe(setRole), []);
+  const access = checkAccess([role], props.roles ?? []);
+  return access.allowed ? props.element : <Navigate to="/dashboards" replace />;
 }
 
 export default function App() {
@@ -22,7 +24,7 @@ export default function App() {
         <React.Suspense fallback={<div className="p-4">Loading…</div>}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboards" replace />} />
-            {ROUTES.map(r => (
+            {ROUTES.map((r) => (
               <Route
                 key={r.path}
                 path={r.path}
@@ -34,7 +36,9 @@ export default function App() {
               element={
                 <div className="rounded border p-6">
                   <h3 className="font-medium mb-2">Page not found</h3>
-                  <p className="text-sm text-muted-foreground">Use the navigation to access available workflows.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Use the navigation to access available workflows.
+                  </p>
                 </div>
               }
             />
