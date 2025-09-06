@@ -7,7 +7,7 @@ export default function DashboardsHome(){
       <section className="rounded border p-4">
         <h3 className="font-medium mb-2">Finance</h3>
         <p className="text-sm text-muted-foreground mb-3">KPIs & reconciliation.</p>
-        <Link className="underline text-sm" to="/finance">Open Finance Dashboard →</Link>
+        <Link className="underline text-sm" to="/dashboards/finance">Open Finance Dashboard →</Link>
       </section>
       <section className="rounded border p-4">
         <h3 className="font-medium mb-2">RMA</h3>
