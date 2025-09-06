@@ -50936,6 +50936,7 @@ packages/spark-tools/node_modules/octokit/dist-types/octokit.d.ts
 packages/spark-tools/node_modules/octokit/dist-types/version.d.ts
 packages/spark-tools/node_modules/octokit/package.json
 packages/spark-tools/package.json
+public/mock/products.json
 runtime.config.json
 spark.meta.json
 src/App.tsx
