@@ -1095,36 +1095,79 @@ logEvent({
   actor: 'system'
 });
 
-export const BUILD_LOG_V17_1_2_P3C = {
-  version: "V17.1.2-p3c",
+// V17.1.2-p4h critical patch completion logging
+logEvent({ 
+  version: 'V17.1.2-p4h', 
+  module: 'build-log', 
+  action: 'rma_adjustments_jsx_fix_complete',
+  details: { 
+    critical_issue_resolved: 'Unterminated JSX contents error in src/components/rma-adjustments.tsx eliminated',
+    component_replaced: 'Complete replacement with clean, compilable JSX structure',
+    crash_proofing_implemented: 'Loading states, empty states, and error boundary integration',
+    safe_utilities_usage: 'safeArr, safeNum, safeStr, fmtCurrency for null-safe operations',
+    versioned_logging_maintained: 'All load/transform operations logged with V17.1.2-p4h context',
+    error_boundary_hoc_applied: 'withErrorBoundary HOC wrapping component for crash prevention',
+    api_integration: 'Safe fetch with fallback to empty array on errors',
+    build_status: 'compilable',
+    typescript_ready: true,
+    forward_compatibility: 'RMA Adjustments ready for stable operation'
+  },
+  actor: 'system'
+});
+
+export const BUILD_LOG_V17_1_2_P4H = {
+  version: "V17.1.2-p4h",
   buildDate: new Date().toISOString().split('T')[0],
-  basedOn: "V17.1.2-p3b",
+  basedOn: "V17.1.2-p4g",
   changes: [
     {
-      module: "safe-ts-hard-overwrite",
-      description: "Hard overwrite of corrupted src/lib/safe.ts with clean ES module",
-      files: ["src/lib/safe.ts"],
+      module: "rma-adjustments-jsx-fix",
+      description: "Fixed corrupted JSX in src/components/rma-adjustments.tsx by complete replacement",
+      files: ["src/components/rma-adjustments.tsx"],
+      status: "completed"
+    },
+    {
+      module: "crash-proofing",
+      description: "Implemented comprehensive crash-proofing with loading states, empty states, and error boundaries",
+      files: ["src/components/rma-adjustments.tsx"],
+      status: "completed"
+    },
+    {
+      module: "safe-utilities-integration",
+      description: "Integrated safe utilities (safeArr, safeNum, safeStr, fmtCurrency) for null-safe operations",
+      files: ["src/components/rma-adjustments.tsx"],
+      status: "completed"
+    },
+    {
+      module: "versioned-logging",
+      description: "All RMA operations now log with V17.1.2-p4h version context",
+      files: ["src/components/rma-adjustments.tsx"],
+      status: "completed"
+    },
+    {
+      module: "error-boundary-hoc",
+      description: "Applied withErrorBoundary HOC for crash prevention and error logging",
+      files: ["src/components/rma-adjustments.tsx"],
       status: "completed"
     },
     {
       module: "version-tag-update",
-      description: "Updated version from V17.1.2-p3b to V17.1.2-p3c across all files",
-      files: ["src/App.tsx", "index.html", "src/lib/version.ts"],
-      status: "completed"
-    },
-    {
-      module: "version-type-extension",
-      description: "Extended VersionTag type to support patch letter suffixes",
-      files: ["src/lib/version.ts"],
+      description: "Updated version from V17.1.2-p10a to V17.1.2-p4h across app components",
+      files: ["src/App.tsx", "index.html"],
       status: "completed"
     }
   ],
   readinessChecklist: {
     noTypeScriptErrors: true,
-    safeUtilitiesCompile: true,
-    moduleParseClean: true,
-    versionTagUpdated: true,
-    buildReady: true,
-    themeWorkUnblocked: true
+    rmaAdjustmentsCompilable: true,
+    jsxSyntaxClean: true,
+    crashProofingImplemented: true,
+    safeUtilitiesIntegrated: true,
+    versionedLoggingMaintained: true,
+    errorBoundaryApplied: true,
+    loadingStatesImplemented: true,
+    emptyStatesHandled: true,
+    apiIntegrationSafe: true,
+    buildReady: true
   }
 } as const;
