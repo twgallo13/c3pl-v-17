@@ -1,37 +1,37 @@
-// V17.1.2-p5b — RMA Adjustments (compile-stable minimal view)
+// V17.1.2-p5c — RMA Adjustments (compile-stable minimal view)
 import React from 'react';
+import { fmtCurrency, safeNum, safeStr } from '@/lib/safe';
+
 type RmaAdjustment = {
-
-  gl_journal_id?: stri
+  id: string;
+  artifact_type?: string;
+  amount?: number;
+  gl_journal_id?: string | null;
+  posted_at?: string | null;
 };
-const MOCK_ROWS: RmaAdjus
-export default fun
 
+const MOCK_ROWS: RmaAdjustment[] = [];
+
+export default function RmaAdjustments(): JSX.Element {
+  const rows: RmaAdjustment[] = MOCK_ROWS; // placeholder until API is wired
+
+  if (!rows.length) {
     return (
-  
-
+      <div className="rounded border p-6">
+        <h3 className="font-medium mb-1">RMA Adjustments</h3>
+        <p className="text-sm text-muted-foreground">
+          No adjustments found. When available, they’ll appear here.
+        </p>
       </div>
+    );
+  }
 
   return (
+    <div className="rounded border p-4">
       <h3 className="font-medium mb-3">RMA Adjustments</h3>
-
-            <tr class
-            
-              <th className="py-2">Posted<
-          </thead>
-            {rows.map((r) => (
-                <td className="py-2 pr-3">{safeStr(r.artifact_type)}
-            
-            
-      
-   
-
-
-
-
-
-
-
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
             <tr className="text-left border-b">
               <th className="py-2 pr-3">Artifact</th>
               <th className="py-2 pr-3">Amount</th>
