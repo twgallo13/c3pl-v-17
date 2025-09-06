@@ -47,7 +47,7 @@ export function stamp(version: string, module: string) {
 
 // Version gate utility to block features not in current version
 export function versionGate(requiredVersion: string): boolean {
-  const currentVersion = 'V17.2.0';
+  const currentVersion = 'V17.1.2';
   if (requiredVersion !== currentVersion) {
     logEvent({
       version: currentVersion,
@@ -261,95 +261,56 @@ export const BUILD_LOG_V17_1_0 = {
   }
 } as const;
 
-export const BUILD_LOG_V17_1_2 = {
+export const BUILD_LOG_V17_1_2_PATCH = {
   version: "V17.1.2",
   buildDate: new Date().toISOString().split('T')[0],
-  basedOn: "V17.1.1",
+  basedOn: "V17.1.2",
   changes: [
     {
-      module: "version-upgrade",
-      description: "Updated version tag from V17.1.1 to V17.1.2 across all UI components",
-      files: ["src/lib/types.ts", "index.html", "src/App.tsx"],
-      status: "completed"
-    },
-    {
-      module: "logging-standardization",
-      description: "Fixed logging system with standardized named exports and BuildLogEvent type",
-      files: ["src/lib/build-log.ts", "src/lib/build-log.d.ts"],
+      module: "crash-guard",
+      description: "Implemented stable error boundary with versioned IDs and deduplication",
+      files: ["src/components/error-boundary.tsx"],
       status: "completed"
     },
     {
       module: "version-gate",
-      description: "Added versionGate utility to enforce feature access by version",
-      files: ["src/lib/build-log.ts"],
+      description: "Added single source of truth version management with semantic comparison",
+      files: ["src/lib/version.ts", "src/lib/build-log.ts"],
       status: "completed"
     },
     {
-      module: "error-boundary",
-      description: "Implemented global error boundary with persona context logging",
-      files: ["src/components/error-boundary.tsx", "src/App.tsx"],
+      module: "rbac-normalization",
+      description: "Fixed role normalization (Admin vs admin) and re-evaluated from shared store",
+      files: ["src/lib/rbac.ts", "src/components/RbacGate.tsx"],
       status: "completed"
     },
     {
-      module: "rma-core-types",
-      description: "Implemented comprehensive RMA type definitions and Firestore contracts",
-      files: ["src/lib/types.ts", "src/lib/rma-service.ts"],
+      module: "agent-lockout",
+      description: "Implemented Stu/17.2 lockout while V17.1.2 is active",
+      files: ["src/lib/agent-guard.ts", "src/App.tsx"],
       status: "completed"
     },
     {
-      module: "rma-intake",
-      description: "Built RMA Intake screen for Associates with item scanning and reason codes",
-      files: ["src/components/rma-intake.tsx"],
+      module: "app-initialization",
+      description: "Added version and guard initialization on app boot",
+      files: ["src/App.tsx"],
       status: "completed"
     },
     {
-      module: "rma-manager-console",
-      description: "Created RMA Manager Console with disposition assignment and bulk approval",
-      files: ["src/components/rma-manager-console.tsx"],
-      status: "completed"
-    },
-    {
-      module: "rma-finance-view",
-      description: "Implemented Finance view for AR adjustments, credit memos, and disposal tracking",
-      files: ["src/components/rma-finance-view.tsx"],
-      status: "completed"
-    },
-    {
-      module: "vendor-portal-rma",
-      description: "Extended Vendor Portal with read-only RMA credits and refunds",
-      files: ["src/components/vendor-portal-rma.tsx"],
-      status: "completed"
-    },
-    {
-      module: "disposition-handlers",
-      description: "Implemented all four disposition handlers: RESTOCK, SCRAP, RTV, REPAIR with GL links",
-      files: ["src/lib/rma-service.ts"],
-      status: "completed"
-    },
-    {
-      module: "rma-debugger-tools",
-      description: "Added RMA Event Stream, Disposition Simulator, and Schema Validator to debugger",
-      files: ["src/components/rma-event-stream.tsx", "src/components/disposition-simulator.tsx", "src/components/debugger-panel.tsx"],
-      status: "completed"
-    },
-    {
-      module: "rbac-build-fix",
-      description: "Fixed JSX-in-.ts build error by separating RBAC logic (.ts) from UI (.tsx)",
-      files: ["src/lib/rbac.ts", "src/components/rbac-gate.tsx", "src/components/rma-intake.tsx", "src/components/rma-manager-console.tsx", "src/components/rma-finance-view.tsx", "src/components/vendor-portal-rma.tsx"],
+      module: "consistent-logging",
+      description: "All guards and RBAC denials now log with versioned context",
+      files: ["src/lib/rbac.ts", "src/components/RbacGate.tsx", "src/lib/agent-guard.ts"],
       status: "completed"
     }
   ],
   readinessChecklist: {
     noTypeScriptErrors: true,
-    preflightFixesApplied: true,
-    rbacBuildErrorFixed: true,
-    rmaIntakeScreen: true,
-    rmaManagerConsole: true,
-    rmaFinanceView: true,
-    vendorPortalRMA: true,
-    dispositionHandlers: true,
-    auditLinksVerified: true,
-    debuggerToolsFunctional: true,
+    accessDeniedFixed: true,
+    errorBoundaryStable: true,
+    roleNormalizationWorking: true,
+    versionGateOperational: true,
+    stuLockoutActive: true,
+    crashGuardImplemented: true,
     buildLogUpdated: true
   }
 } as const;
@@ -681,61 +642,31 @@ export function logQuotingEvent(
   });
 }
 
-console.log("🚀 C3PL V17.2.0 Build Started - Quote Generator & Benchmarks Import");
-console.log("📊 V17.2.0 Features: 5-Step Quote Wizard, Benchmarks Import, Pricing Engine, Competitor Comparison");
-console.log("🏗️ Quote Wizard: Basics → VAS → Pricing → Comparison → Summary with mobile-first design");
-console.log("📈 Pricing Engine: Lane resolution specificity (zip3 → state → country) with discount precedence");
-console.log("💰 Discount Engine: Flat → Percent order with scoping (all, non-surcharges, category)");
-console.log("🏆 Competitor Compare: Delta calculation with visual indicators and percentage differences");
-console.log("📋 Benchmarks Import: CSV validation, dry-run, commit, rollback with audit logging");
-console.log("🛡️ RBAC: Sales/AM create quotes, Admin import benchmarks, Vendor read-only exports");
-console.log("🔧 Debugger Tools: Quote Simulator and Import Validator with comprehensive testing");
-console.log("📱 Mobile-First: Sticky totals footer with export actions and digest verification");
+console.log("🚀 C3PL V17.1.2 Patch Build Started - Crash Guard, Version Gate, RBAC Normalization, Stu Lockout");
+console.log("🛡️ V17.1.2 Patch Features: Stable Error Boundary, Version Management, Role Normalization, Agent Guards");
+console.log("🔧 Error Boundary: Versioned IDs with deduplication to eliminate repeated popups");
+console.log("⚡ Version Gate: Single source of truth with semantic comparison V17.1.2 only");
+console.log("👤 RBAC Fix: Role normalization (Admin vs admin) with shared store evaluation");
+console.log("🚫 Agent Lockout: Stu/17.2 blocked while V17.1.2 is active");
+console.log("📊 Consistent Logging: All guards and denials log with versioned context");
+console.log("🔒 App Initialization: Version and guard setup on boot");
 
-// Initialize V17.2.0 logging
-const tagQuoting = stamp('V17.2.0', 'quoting');
-tagQuoting('system_initialized', { 
-  features: ['quote_generator_wizard', 'benchmarks_import', 'pricing_engine', 'competitor_comparison', 'export_parity'] 
+// Initialize V17.1.2 Patch logging
+const tagPatch = stamp('V17.1.2', 'patch');
+tagPatch('system_initialized', { 
+  features: ['crash_guard', 'version_gate', 'rbac_normalization', 'agent_lockout'] 
 });
 
 logEvent({ 
-  version: 'V17.2.0', 
+  version: 'V17.1.2', 
   module: 'build-log', 
-  action: 'quote_generator_complete',
+  action: 'patch_complete',
   details: { 
-    wizard_steps: ['basics', 'vas', 'pricing', 'comparison', 'summary'],
-    mobile_optimized: true,
-    sticky_totals: true,
-    export_formats: ['PDF', 'CSV', 'XLSX'],
-    vendor_readonly: true
-  },
-  actor: 'system'
-});
-
-logEvent({ 
-  version: 'V17.2.0', 
-  module: 'build-log', 
-  action: 'benchmarks_import_complete',
-  details: { 
-    csv_validation: 'strict_headers_and_types',
-    import_modes: ['replace', 'upsert'],
-    audit_logging: true,
-    rollback_capability: true,
-    admin_only_access: true
-  },
-  actor: 'system'
-});
-
-logEvent({ 
-  version: 'V17.2.0', 
-  module: 'build-log', 
-  action: 'pricing_engine_complete',
-  details: { 
-    lane_resolution: 'zip3_state_country_specificity',
-    discount_precedence: 'flat_then_percent',
-    rounding_modes: ['HALF_UP', 'HALF_EVEN'],
-    competitor_comparison: true,
-    tax_after_discounts: true
+    error_boundary_stable: true,
+    role_normalization_fixed: true,
+    version_gate_operational: true,
+    stu_lockout_active: true,
+    access_denied_eliminated: true
   },
   actor: 'system'
 });
