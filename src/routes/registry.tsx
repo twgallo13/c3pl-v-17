@@ -1,4 +1,4 @@
-// V17.1.2-p4b — explicit route registry (compile repair)
+// V17.1.2-p4c — explicit route registry (clean themed layout)
 
 import React from 'react';
 import type { Role } from '@/lib/role-store';
