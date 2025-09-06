@@ -313,6 +313,12 @@ export const BUILD_LOG_V17_1_2_PATCH = {
       description: "Added BUILD_LOG_V17_1_2 compatibility export for transition checklist component",
       files: ["src/lib/build-log.ts"],
       status: "completed"
+    },
+    {
+      module: "error-boundary-hoc-export",
+      description: "Added withErrorBoundary HOC export for RMA intake crash guard",
+      files: ["src/components/error-boundary.tsx"],
+      status: "completed"
     }
   ],
   readinessChecklist: {
@@ -324,6 +330,7 @@ export const BUILD_LOG_V17_1_2_PATCH = {
     stuLockoutActive: true,
     crashGuardImplemented: true,
     rbacServiceExportFixed: true,
+    withErrorBoundaryHocExported: true,
     buildLogUpdated: true,
     transitionChecklistLoggerFixed: true
   }
@@ -684,6 +691,7 @@ export function buildLogFor(version: string, module: string): BuildLogCallable {
     stuLockoutActive: true,
     crashGuardImplemented: true,
     rbacServiceExportFixed: true,
+    withErrorBoundaryHocExported: true,
     buildLogUpdated: true,
     
     // WMS requirements
@@ -722,6 +730,7 @@ console.log("👤 RBAC Fix: Role normalization (Admin vs admin) with shared stor
 console.log("🚫 Agent Lockout: Stu/17.2 blocked while V17.1.2 is active");
 console.log("📊 Consistent Logging: All guards and denials log with versioned context");
 console.log("🔒 App Initialization: Version and guard setup on boot");
+console.log("✅ Export Fix: withErrorBoundary HOC now available for RMA intake crash guard");
 
 // Initialize V17.1.2 Patch logging
 const tagPatch = stamp('V17.1.2', 'patch');
@@ -749,6 +758,21 @@ logEvent({
 logEvent({ 
   version: 'V17.1.2', 
   module: 'build-log', 
+  action: 'with_error_boundary_hoc_export_complete',
+  details: { 
+    issue_resolved: 'withErrorBoundary named export missing from error-boundary.tsx',
+    hoc_implemented: 'Higher-order component for wrapping components in error boundary',
+    component_api_extended: 'Added component and actor props to ErrorBoundary',
+    rma_intake_crash_guard_active: true,
+    versioned_logging_maintained: true,
+    typescript_clean: true
+  },
+  actor: 'system'
+});
+
+logEvent({ 
+  version: 'V17.1.2', 
+  module: 'build-log', 
   action: 'patch_complete',
   details: { 
     error_boundary_stable: true,
@@ -756,7 +780,8 @@ logEvent({
     version_gate_operational: true,
     stu_lockout_active: true,
     access_denied_eliminated: true,
-    rbac_service_export_fixed: true
+    rbac_service_export_fixed: true,
+    with_error_boundary_hoc_exported: true
   },
   actor: 'system'
 });

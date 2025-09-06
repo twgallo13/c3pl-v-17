@@ -3,15 +3,21 @@ import React from 'react';
 import { logEvent } from '@/lib/build-log';
 import { getActiveVersion } from '@/lib/version';
 
-function mkErrorId() {
+export function mkErrorId(): string {
   const ts = Date.now();
   const rnd = Math.random().toString(36).slice(2, 10);
   return `err-${ts}-${rnd}`;
 }
 
+type BoundaryProps = React.PropsWithChildren<{
+  actor?: string;
+  module?: string;
+  component?: string;
+}>;
+
 type State = { hasError: boolean; errId?: string; message?: string };
 
-export class ErrorBoundary extends React.Component<React.PropsWithChildren<{ actor?: string; module?: string }>, State> {
+export class ErrorBoundary extends React.Component<BoundaryProps, State> {
   state: State = { hasError: false };
 
   static getDerivedStateFromError(e: unknown): State {
@@ -25,13 +31,16 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren<{ act
   componentDidCatch(error: unknown, info: React.ErrorInfo) {
     const errId = this.state.errId ?? mkErrorId();
     const version = getActiveVersion();
+    const module = this.props.module ?? 'app';
+    const component = this.props.component ?? 'Unknown';
     
     logEvent({
       version,
-      module: this.props.module ?? 'app',
+      module,
       action: 'ui_exception',
       details: { 
-        errId, 
+        errId,
+        component,
         message: this.state.message, 
         stack: (error as any)?.stack, 
         componentStack: info.componentStack 
@@ -76,3 +85,30 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren<{ act
     return this.props.children;
   }
 }
+
+type HocOptions = { 
+  module?: string; 
+  component?: string; 
+  actor?: string;
+};
+
+/** HOC: wraps a component in ErrorBoundary with versioned logging */
+export function withErrorBoundary<P extends object>(
+  Wrapped: React.ComponentType<P>,
+  opts: HocOptions = {}
+) {
+  const module = opts.module ?? 'app';
+  const component = opts.component ?? Wrapped.displayName ?? Wrapped.name ?? 'Component';
+  const actor = opts.actor;
+
+  const ComponentWithBoundary: React.FC<P> = (props) => (
+    <ErrorBoundary module={module} component={component} actor={actor}>
+      <Wrapped {...props} />
+    </ErrorBoundary>
+  );
+
+  ComponentWithBoundary.displayName = `withErrorBoundary(${component})`;
+  return ComponentWithBoundary;
+}
+
+export default ErrorBoundary;
