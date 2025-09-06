@@ -1,5 +1,7 @@
 import { QAUser, UserRole, LogEntry } from "./types";
 
+export const APP_VERSION = "V17.0.1";
+
 export const QA_USER: QAUser = {
   id: "qa-user-001",
   username: "qa_tester",

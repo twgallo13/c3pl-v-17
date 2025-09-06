@@ -5,12 +5,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { User, Terminal, Settings, Check } from "@phosphor-icons/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { User, Terminal, Settings, Check, Network, FileText, Bug } from "@phosphor-icons/react";
 import { useKV } from "@github/spark/hooks";
 import { useState } from "react";
 import { VERSION, UserRole, QAUser, LogEntry } from "@/lib/types";
 import { QA_USER, USER_ROLES, createLogEntry, formatLogEntry } from "@/lib/constants";
 import { VersionDisplay } from "./version-display";
+import { NetworkInspector } from "./network-inspector";
+import { SchemaValidator } from "./schema-validator";
+import { ErrorReplayer } from "./error-replayer";
 
 interface DebuggerPanelProps {
   className?: string;
@@ -79,100 +83,137 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
             <Settings size={20} />
             C3PL Debugger
           </CardTitle>
-          <VersionDisplay />
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              Active Version: {VERSION}
+            </Badge>
+            <VersionDisplay />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* QA Login Section */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Authentication</Label>
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={handleQALogin}
-              className="flex items-center gap-2"
-              disabled={isLoggedIn}
-            >
-              {isLoggedIn ? <Check size={16} /> : <User size={16} />}
-              {isLoggedIn ? "Logged In" : "QA Login"}
-            </Button>
-            {isLoggedIn && currentUser && (
-              <Badge variant="secondary" className="font-mono text-xs">
-                {currentUser.username}
-              </Badge>
-            )}
-          </div>
-        </div>
+        <Tabs defaultValue="controls" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="controls">Controls</TabsTrigger>
+            <TabsTrigger value="network">
+              <Network size={16} className="mr-1" />
+              Network
+            </TabsTrigger>
+            <TabsTrigger value="schema">
+              <FileText size={16} className="mr-1" />
+              Schema
+            </TabsTrigger>
+            <TabsTrigger value="errors">
+              <Bug size={16} className="mr-1" />
+              Errors
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Role Switcher Section */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Role Switcher</Label>
-          <Select value={currentRole} onValueChange={handleRoleSwitch}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {USER_ROLES.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {role}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Console Toggle Section */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Console Output</Label>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="console-toggle"
-              checked={consoleEnabled}
-              onCheckedChange={handleConsoleToggle}
-            />
-            <Label htmlFor="console-toggle" className="text-sm">
-              {consoleEnabled ? "Enabled" : "Disabled"}
-            </Label>
-          </div>
-        </div>
-
-        {/* Console Output Display */}
-        {consoleEnabled && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Terminal size={16} />
-                Structured Logs
-              </Label>
-              <Button variant="outline" size="sm" onClick={clearLogs}>
-                Clear
-              </Button>
-            </div>
-            <ScrollArea className="h-48 w-full rounded border bg-muted/30 p-3">
-              <div className="space-y-1 font-mono text-xs">
-                {logs.length === 0 ? (
-                  <div className="text-muted-foreground">No logs yet...</div>
-                ) : (
-                  logs.map((log, index) => (
-                    <div
-                      key={index}
-                      className={`${
-                        log.level === "error"
-                          ? "text-destructive"
-                          : log.level === "warn"
-                          ? "text-yellow-600"
-                          : log.level === "info"
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {formatLogEntry(log)}
-                    </div>
-                  ))
+          <TabsContent value="controls" className="space-y-6">
+            {/* QA Login Section */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Authentication</Label>
+              <div className="flex items-center gap-3">
+                <Button 
+                  onClick={handleQALogin}
+                  className="flex items-center gap-2"
+                  disabled={isLoggedIn}
+                >
+                  {isLoggedIn ? <Check size={16} /> : <User size={16} />}
+                  {isLoggedIn ? "Logged In" : "QA Login"}
+                </Button>
+                {isLoggedIn && currentUser && (
+                  <Badge variant="secondary" className="font-mono text-xs">
+                    {currentUser.username}
+                  </Badge>
                 )}
               </div>
-            </ScrollArea>
-          </div>
-        )}
+            </div>
+
+            {/* Role Switcher Section */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Role Switcher</Label>
+              <Select value={currentRole} onValueChange={handleRoleSwitch}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {USER_ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Console Toggle Section */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Console Output</Label>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="console-toggle"
+                  checked={consoleEnabled}
+                  onCheckedChange={handleConsoleToggle}
+                />
+                <Label htmlFor="console-toggle" className="text-sm">
+                  {consoleEnabled ? "Enabled" : "Disabled"}
+                </Label>
+              </div>
+            </div>
+
+            {/* Console Output Display */}
+            {consoleEnabled && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Terminal size={16} />
+                    Structured Logs
+                  </Label>
+                  <Button variant="outline" size="sm" onClick={clearLogs}>
+                    Clear
+                  </Button>
+                </div>
+                <ScrollArea className="h-48 w-full rounded border bg-muted/30 p-3">
+                  <div className="space-y-1 font-mono text-xs">
+                    {logs.length === 0 ? (
+                      <div className="text-muted-foreground">No logs yet...</div>
+                    ) : (
+                      logs.map((log, index) => (
+                        <div
+                          key={index}
+                          className={`${
+                            log.level === "error"
+                              ? "text-destructive"
+                              : log.level === "warn"
+                              ? "text-yellow-600"
+                              : log.level === "info"
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {formatLogEntry(log)}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="network">
+            <NetworkInspector />
+          </TabsContent>
+
+          <TabsContent value="schema">
+            <SchemaValidator />
+          </TabsContent>
+
+          <TabsContent value="errors">
+            <ErrorReplayer />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
