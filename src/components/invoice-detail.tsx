@@ -11,7 +11,7 @@ import { Invoice, UserRole, InvoiceNote } from "@/lib/types";
 import { invoiceService } from "@/lib/invoice-service";
 import { logEvent, stamp } from "@/lib/build-log";
 
-const tag = stamp('V17.1.3', 'invoice-detail');
+const tag = stamp('V17.1.4', 'invoice-detail');
 
 interface InvoiceDetailProps {
   invoice: Invoice;
@@ -230,8 +230,9 @@ export function InvoiceDetail({ invoice, userRole, onBack }: InvoiceDetailProps)
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
           <TabsTrigger value="exports">Exports</TabsTrigger>
         </TabsList>
@@ -458,6 +459,110 @@ export function InvoiceDetail({ invoice, userRole, onBack }: InvoiceDetailProps)
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payments" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Allocations</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Payments applied to this invoice
+              </p>
+            </CardHeader>
+            <CardContent>
+              {/* Mock payment data - in real app, fetch from payments service */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-medium mb-3">Payment Summary</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Invoice Total:</span>
+                        <span className="font-mono">{formatCurrency(invoice.totals.grandTotal)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Payments Applied:</span>
+                        <span className="font-mono">{formatCurrency(invoice.status === 'Paid' ? invoice.totals.grandTotal : 0)}</span>
+                      </div>
+                      <div className="flex justify-between font-medium border-t pt-2">
+                        <span>Remaining Balance:</span>
+                        <span className="font-mono">
+                          {formatCurrency(invoice.status === 'Paid' ? 0 : invoice.totals.grandTotal)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-3">GL Journal</h3>
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <div className="flex items-center gap-2 text-sm">
+                        <ExternalLink className="h-4 w-4" />
+                        <span>GL Journal ID:</span>
+                        <span className="font-mono">GL-{invoice.id.substr(-6)}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {invoice.status === 'Issued' ? 'Posted on issue' : 'Journal entry available'}
+                      </p>
+                    </div>
+                    
+                    {(userRole === 'Finance' || userRole === 'Admin') && invoice.status === 'Issued' && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full mt-3"
+                      >
+                        Mark Reconciled
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Payment Allocations Table */}
+                <div className="border-t pt-4">
+                  <h3 className="font-medium mb-3">Payment History</h3>
+                  {invoice.status === 'Paid' ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Payment Date</TableHead>
+                          <TableHead>Method</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Receipt ID</TableHead>
+                          <TableHead>Reference</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>{formatDate(invoice.updatedAt)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Receipt className="h-4 w-4" />
+                              ACH
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-mono">
+                            {formatCurrency(invoice.totals.grandTotal)}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            PAY-{invoice.id.substr(-6)}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            ACH-{Math.random().toString(36).substr(2, 8).toUpperCase()}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Receipt className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>No payments applied to this invoice</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

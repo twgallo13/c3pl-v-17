@@ -1,5 +1,5 @@
 /**
- * C3PL V17.1.3 Role-Based Access Control - Core Logic
+ * C3PL V17.1.4 Role-Based Access Control - Core Logic
  * Server-side and client route guards for secure feature access
  * Pure TypeScript logic - no JSX components
  */
@@ -20,37 +20,37 @@ export interface AccessCheckResult {
   requiredRoles?: UserRole[];
 }
 
-// Finance Access Rules (V17.1.3)
+// Finance Access Rules (V17.1.4)
 export const FINANCE_ACCESS_RULES: Record<string, RBACRule> = {
   "finance:dashboard": {
     roles: ["Finance", "Admin"],
     module: "finance",
     action: "dashboard",
-    version: "V17.1.3"
+    version: "V17.1.4"
   },
   "finance:gl_post": {
     roles: ["Finance", "Admin"],
     module: "finance",
     action: "gl_post",
-    version: "V17.1.3"
+    version: "V17.1.4"
   },
   "finance:payment_record": {
     roles: ["Finance", "Admin"],
     module: "finance",
     action: "payment_record",
-    version: "V17.1.3"
+    version: "V17.1.4"
   },
   "finance:export_parity": {
     roles: ["Finance", "Admin"],
     module: "finance",
     action: "export_parity",
-    version: "V17.1.3"
+    version: "V17.1.4"
   },
   "finance:rma_adjustments": {
     roles: ["Finance", "Admin"],
     module: "finance",
     action: "rma_adjustments",
-    version: "V17.1.3"
+    version: "V17.1.4"
   }
 };
 
@@ -94,7 +94,7 @@ export const RMA_ACCESS_RULES: Record<string, RBACRule> = {
   }
 };
 
-// Invoice Access Rules (existing, updated for V17.1.3)
+// Invoice Access Rules (existing, updated for V17.1.4)
 export const INVOICE_ACCESS_RULES: Record<string, RBACRule> = {
   "invoice:create": {
     roles: ["Finance", "Admin"],
@@ -120,19 +120,19 @@ export const INVOICE_ACCESS_RULES: Record<string, RBACRule> = {
     roles: ["Finance", "Admin"],
     module: "invoice",
     action: "issue",
-    version: "V17.1.3"
+    version: "V17.1.4"
   },
   "invoice:void": {
     roles: ["Finance", "Admin"],
     module: "invoice",
     action: "void",
-    version: "V17.1.3"
+    version: "V17.1.4"
   },
   "invoice:pay": {
     roles: ["Finance", "Admin"],
     module: "invoice",
     action: "pay",
-    version: "V17.1.3"
+    version: "V17.1.4"
   }
 };
 
@@ -189,7 +189,7 @@ export class RBACService {
     
     if (!rule) {
       logEvent({
-        version: "V17.1.3",
+        version: "V17.1.4",
         module: "rbac",
         action: "permission_not_found",
         details: { permission, userRole },
@@ -214,7 +214,7 @@ export class RBACService {
     const allowed = rule.roles.includes(userRole);
     
     logEvent({
-      version: "V17.1.3",
+      version: "V17.1.4",
       module: "rbac",
       action: allowed ? "access_granted" : "access_denied",
       details: { 

@@ -1,4 +1,4 @@
-# C3PL V17.1.3 - Product Requirements Document
+# C3PL V17.1.4 - Product Requirements Document
 
 ## Version History
 - **V17.0.0**: Initial release with QA login, role switcher, console output toggle, basic debugger
@@ -7,47 +7,60 @@
 - **V17.1.1**: WMS implementation with receiving, wave control, picking, and packout workflows
 - **V17.1.2**: RMA end-to-end with disposition handlers, audit links, and finance integration
 - **V17.1.3**: Finance hardening with GL posting, export parity, advanced math, and dashboard
+- **V17.1.4**: Payments Console with bank reconciliation, AR aging enhancements, and dunning automation
 
 ## Core Purpose & Success
 
-**Mission Statement**: C3PL is a comprehensive financial operations and warehouse management system that provides real-time visibility into invoices, returns, GL journals, and export compliance with enterprise-grade audit trails.
+**Mission Statement**: C3PL is a comprehensive financial operations and warehouse management system that provides real-time payment processing, bank reconciliation, AR aging analysis, and automated dunning with enterprise-grade audit trails.
 
 **Success Indicators**: 
-- GL journals balanced and linked to all financial artifacts
-- Export parity validation passing across PDF/CSV/XLSX formats
-- Finance dashboard providing real-time AR aging and GL activity
-- Payment flows updating invoice status with optional GL posting
-- Advanced discount and tax calculations with proper precedence
+- Payments applied across multiple invoices with correct residual balances
+- Bank reconciliation matching receipts with transaction references
+- AR aging totals equal sum of open invoice balances
+- Dunning export generated with correct stages and amounts
+- Remittance export parity passing (UI vs PDF/CSV)
+- All payment operations logged with V17.1.4 version tracking
 
-**Experience Qualities**: Professional, Accurate, Compliant
+**Experience Qualities**: Professional, Automated, Comprehensive
 
 ## Project Classification & Approach
 
-**Complexity Level**: Complex Enterprise Application with financial operations, GL integration, export compliance, and advanced business logic
-**Primary User Activity**: Creating, Acting, and Analyzing - users process financial transactions, manage returns, and analyze business data
+**Complexity Level**: Complex Enterprise Application with payment processing, bank reconciliation, AR management, and automated dunning
+**Primary User Activity**: Processing, Reconciling, and Managing - users process payments, reconcile bank feeds, and manage customer collections
 
 ## Essential Features
 
-### V17.1.3 Finance Features
+### V17.1.4 Payments Features
 
-#### 1. GL Posting Service
-- **Functionality**: Centralized general ledger posting with validation and audit trail
-- **Purpose**: Ensure all financial transactions are properly recorded with balanced entries
-- **Success Criteria**: All GL entries balanced, journal IDs linked to source documents, validation prevents unbalanced entries
+#### 1. Payments Console
+- **Functionality**: Finance/Admin interface for comprehensive payment management
+- **Purpose**: Centralized payment processing with role-based access control
+- **Success Criteria**: Four functional tabs (Receipts, Unapplied, Reconciliation, Dunning), RBAC enforced, real-time status updates
 
-#### 2. Finance Math Service  
-- **Functionality**: Centralized discount, tax, and rounding calculations with enforcement
-- **Purpose**: Consistent financial calculations across all modules with proper precedence
-- **Success Criteria**: Discount order enforced (flat → percent), tax basis calculated after discounts, duties non-discountable
+#### 2. Payment Processing Service
+- **Functionality**: Record, apply, and reconcile payments with GL integration
+- **Purpose**: Complete payment lifecycle with automatic invoice status updates
+- **Success Criteria**: Payments split across multiple invoices, GL entries balanced, status transitions accurate
 
-#### 3. Export Parity Service
-- **Functionality**: Ensures consistency between UI totals and exported file totals with SHA-256 hashing
-- **Purpose**: Prevent discrepancies between displayed and exported financial data
-- **Success Criteria**: UI/export total comparison, digest storage, parity check tool operational
+#### 3. Bank Reconciliation Engine
+- **Functionality**: CSV import with automatic matching by amount, date, and reference
+- **Purpose**: Streamline bank reconciliation with intelligent matching algorithms
+- **Success Criteria**: High-confidence matches identified, manual override capability, reconciliation status tracking
 
-#### 4. Payments Service
-- **Functionality**: Payment recording with invoice status updates and optional GL posting
-- **Purpose**: Complete payment lifecycle from recording to GL integration
+#### 4. Enhanced AR Aging Widget
+- **Functionality**: Clickable aging buckets with filtered invoice navigation
+- **Purpose**: Visual AR analysis with drill-down capability
+- **Success Criteria**: Buckets calculate correctly, click-through functionality, progress bar visualization
+
+#### 5. Dunning Automation
+- **Functionality**: Automated dunning queue generation with configurable rules
+- **Purpose**: Streamline collections process with systematic follow-up
+- **Success Criteria**: Queue generated based on terms, stages calculated correctly, export functionality operational
+
+#### 6. Remittance Advice
+- **Functionality**: Generate payment advice with export parity checking
+- **Purpose**: Professional payment documentation with data integrity
+- **Success Criteria**: PDF/CSV exports match UI totals, digests stored, parity validation passing
 - **Success Criteria**: Invoice status updates to 'paid', optional GL entries balanced, payment history tracking
 
 #### 5. Finance Dashboard

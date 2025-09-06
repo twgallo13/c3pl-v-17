@@ -6,7 +6,7 @@
 import { roundCurrency } from './gl-posting';
 import { logEvent, stamp } from './build-log';
 
-const tag = stamp('V17.1.3', 'finance-math');
+const tag = stamp('V17.1.4', 'finance-math');
 
 export type DiscountType = 'flat' | 'percent';
 export type DiscountScope = 'all' | 'non_surcharges' | `category:${string}`;

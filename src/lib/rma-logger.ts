@@ -5,7 +5,7 @@
 
 import { logEvent, stamp } from '@/lib/build-log';
 
-const tag = stamp('V17.1.3', 'rma');
+const tag = stamp('V17.1.4', 'rma');
 
 export type RmaLogDetails = Record<string, unknown>;
 
@@ -13,7 +13,7 @@ export function logRMAEvent(action: string, details?: RmaLogDetails) {
   // Convenience wrapper so existing call sites remain stable
   tag(action, details);
   // Explicit structured event for stream filters
-  logEvent({ version: 'V17.1.3', module: 'rma', action, details });
+  logEvent({ version: 'V17.1.4', module: 'rma', action, details });
 }
 
 // Legacy compatibility for existing signature
@@ -24,7 +24,7 @@ export function logRMAEventLegacy(
   details?: RmaLogDetails
 ) {
   logEvent({ 
-    version: 'V17.1.3', 
+    version: 'V17.1.4', 
     module: 'rma', 
     action, 
     details: { rmaId, ...details }, 

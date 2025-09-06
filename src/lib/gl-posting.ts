@@ -20,18 +20,19 @@ export type GlPostResult = {
 };
 
 export type GlSource = {
-  version: 'V17.1.3';
+  version: 'V17.1.4';
   module: 'billing' | 'rma' | 'payments';
   sourceRef: {
     invoiceId?: string;
     rmaId?: string;
     rmaLineId?: string;
     paymentId?: string;
+    payment_id?: string;
   };
   entries: GlEntry[];
 };
 
-const tag = stamp('V17.1.3', 'finance');
+const tag = stamp('V17.1.4', 'finance');
 
 /**
  * Post general ledger entries with full validation

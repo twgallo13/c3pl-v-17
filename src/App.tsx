@@ -16,6 +16,7 @@ import RMAFinanceView from "@/components/rma-finance-view";
 import VendorPortalRMA from "@/components/vendor-portal-rma";
 import { FinanceDashboard } from "@/components/finance-dashboard";
 import { RMAAdjustmentsView } from "@/components/rma-adjustments-view";
+import { PaymentsConsole } from "@/components/payments-console";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useKV } from "@github/spark/hooks";
 import { UserRole, Invoice } from "@/lib/types";
@@ -26,7 +27,7 @@ import "@/lib/build-log";
 function App() {
   const [currentRole] = useKV<UserRole>("c3pl-current-role", "Admin");
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "payments-console" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma">("dashboard");
   
   const handleSelectInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -96,7 +97,7 @@ function App() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.3</span>
+                      <span className="ml-2 font-mono">V17.1.4</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Environment:</span>
@@ -130,6 +131,15 @@ function App() {
                   >
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Finance Dashboard
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("payments-console")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Payments Console
                   </Button>
                   
                   <Button 
@@ -241,6 +251,13 @@ function App() {
           />
         )}
 
+        {currentView === "payments-console" && (
+          <PaymentsConsole
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
         {currentView === "rma-adjustments" && (
           <RMAAdjustmentsView
             userRole={currentRole}
@@ -317,7 +334,7 @@ function App() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground pt-6 border-t">
-          C3PL V17.1.3 - Enhanced Finance Features: GL Posting, Export Parity, Finance Dashboard, Advanced Math
+          C3PL V17.1.4 - Payments Console: Payment Processing, Bank Reconciliation, AR Aging, Dunning Management
         </footer>
         </div>
       </div>

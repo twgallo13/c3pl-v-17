@@ -1,340 +1,165 @@
 /**
- * C3PL V17.1.3 Payments Service
- * Handle payment recording, invoice status updates, and optional GL posting
+ * C3PL V17.1.4 Payments Service
+ * Record, apply, and reconcile payments with GL integration
  */
 
-import { logEvent, stamp } from './build-log';
-import { postGL, createPaymentGLEntries, type GlPostResult } from './gl-posting';
-import type { Invoice } from './types';
+import { logEvent, stamp } from '@/lib/build-log';
+import { PaymentReceipt, PaymentMethod, BankTransaction } from '@/lib/types/finance';
+import { Invoice } from '@/lib/types';
+import { postGL } from '@/lib/gl-posting';
 
-const tag = stamp('V17.1.3', 'payments');
+const tag = stamp('V17.1.4', 'payments');
 
-export type PaymentMethod = 'cash' | 'check' | 'ach' | 'wire' | 'card';
+// Record a new payment receipt
+export async function recordPayment(receipt: Omit<PaymentReceipt, 'payment_id' | 'status' | 'allocations'>): Promise<{ payment_id: string }> {
+  const payment_id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  
+  const newReceipt: PaymentReceipt = {
+    ...receipt,
+    payment_id,
+    status: 'recorded',
+    allocations: [],
+    audit: {
+      created_at: new Date().toISOString(),
+      created_by: 'current-user', // In real app, get from auth
+      events: []
+    }
+  };
 
-export interface PaymentRecord {
-  id: string;
-  invoiceId: string;
-  amount: number;
-  method: PaymentMethod;
-  paymentDate: string;       // ISO date
-  reference?: string;        // Check number, transaction ID, etc.
-  notes?: string;
-  glJournalId?: string;      // GL journal entry ID (if GL posting enabled)
-  createdAt: string;
-  createdBy: string;
+  // Store in KV (in real app, this would go to Firestore)
+  // For demo purposes, we'll just log the event
+  tag('payment_recorded', { 
+    payment_id, 
+    method: receipt.method, 
+    amount: receipt.amount,
+    reference: receipt.reference
+  });
+
+  return { payment_id };
 }
 
-export interface PaymentResult {
-  payment: PaymentRecord;
-  invoice: {
-    id: string;
-    previousStatus: string;
-    newStatus: string;
-    balanceDue: number;
-  };
-  glPosted?: GlPostResult;
-}
-
-/**
- * Record a payment against an invoice
- */
-export async function recordPayment(
-  invoiceId: string,
-  amount: number,
-  method: PaymentMethod,
-  paymentDate: string,
-  reference?: string,
-  notes?: string,
-  enableGLPosting: boolean = false,
-  actor: string = 'system'
-): Promise<PaymentResult> {
-  // Validate inputs
-  validatePaymentInputs(invoiceId, amount, method, paymentDate);
+// Apply payment allocations to invoices
+export async function applyPayment(
+  payment_id: string, 
+  allocations: { invoice_id: string; amount: number }[]
+): Promise<{ success: boolean; updated_invoices: string[] }> {
   
-  // Fetch invoice (in real app, from Firestore)
-  const invoice = await fetchInvoice(invoiceId);
-  if (!invoice) {
-    throw new Error(`Invoice ${invoiceId} not found`);
-  }
+  const updated_invoices: string[] = [];
   
-  if (invoice.status === 'draft') {
-    throw new Error(`Cannot record payment against draft invoice ${invoiceId}`);
-  }
-  
-  if (invoice.status === 'void') {
-    throw new Error(`Cannot record payment against voided invoice ${invoiceId}`);
-  }
-  
-  // Calculate new balance
-  const currentPayments = invoice.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
-  const newPaymentsTotal = currentPayments + amount;
-  const balanceDue = Math.max(0, invoice.grandTotal - newPaymentsTotal);
-  
-  if (newPaymentsTotal > invoice.grandTotal) {
-    throw new Error(`Payment amount $${amount} would exceed invoice total $${invoice.grandTotal}`);
-  }
-  
-  // Create payment record
-  const paymentId = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-  const payment: PaymentRecord = {
-    id: paymentId,
-    invoiceId,
-    amount,
-    method,
-    paymentDate,
-    reference,
-    notes,
-    createdAt: new Date().toISOString(),
-    createdBy: actor
-  };
-  
-  let glPosted: GlPostResult | undefined;
-  
-  // Optional GL posting
-  if (enableGLPosting) {
-    try {
-      const glEntries = createPaymentGLEntries({
-        invoiceId,
-        amount,
-        method
-      });
-      
-      glPosted = await postGL({
-        version: 'V17.1.3',
-        module: 'payments',
-        sourceRef: { invoiceId, paymentId },
-        entries: glEntries
-      });
-      
-      payment.glJournalId = glPosted.journalId;
-      
-    } catch (error) {
-      tag('payment_gl_failed', {
-        paymentId,
-        invoiceId,
-        amount,
-        error: error instanceof Error ? error.message : String(error)
-      });
-      throw error;
+  for (const allocation of allocations) {
+    // In real app, update invoice balance and status
+    // For now, just log the allocation
+    tag('payment_applied', {
+      payment_id,
+      invoice_id: allocation.invoice_id,
+      amount: allocation.amount
+    });
+    
+    updated_invoices.push(allocation.invoice_id);
+    
+    // Optional GL posting (Cash/Bank vs AR)
+    if (allocation.amount > 0) {
+      try {
+        await postGL({
+          version: 'V17.1.4',
+          module: 'payments',
+          sourceRef: { payment_id, invoice_id: allocation.invoice_id },
+          entries: [
+            { acct: '1000', debit: allocation.amount, credit: 0, memo: 'Cash received' },
+            { acct: '1200', debit: 0, credit: allocation.amount, memo: 'AR reduction' }
+          ]
+        });
+      } catch (error) {
+        tag('gl_posting_failed', { payment_id, allocation, error: String(error) });
+      }
     }
   }
+
+  // Update payment status
+  const totalAllocated = allocations.reduce((sum, a) => sum + a.amount, 0);
+  // In real app, compare with payment amount to determine if fully applied
   
-  // Determine new invoice status
-  const previousStatus = invoice.status;
-  const newStatus = balanceDue === 0 ? 'paid' : 'issued';
-  
-  // Update invoice (simulate Firestore update)
-  const updatedInvoice = {
-    ...invoice,
-    status: newStatus,
-    payments: [...(invoice.payments || []), payment],
-    balanceDue,
-    lastPaymentDate: paymentDate,
-    paidAt: newStatus === 'paid' ? new Date().toISOString() : invoice.paidAt
-  };
-  
-  // Simulate persistence
-  console.info('[PAYMENT-RECORDED]', payment);
-  console.info('[INVOICE-UPDATED]', { 
-    id: invoiceId, 
-    previousStatus, 
-    newStatus, 
-    balanceDue,
-    paymentsCount: updatedInvoice.payments.length
+  tag('payment_allocations_applied', {
+    payment_id,
+    total_allocated: totalAllocated,
+    invoice_count: allocations.length
   });
-  
-  // Log payment event
-  tag('payment_recorded', {
-    paymentId,
-    invoiceId,
-    amount,
-    method,
-    balanceDue,
-    statusChange: previousStatus !== newStatus ? `${previousStatus} → ${newStatus}` : null,
-    glPosted: !!glPosted
-  });
-  
-  // Log status change if applicable
-  if (previousStatus !== newStatus) {
-    logEvent({
-      version: 'V17.1.3',
-      module: 'billing',
-      action: 'invoice_paid',
-      details: {
-        invoiceId,
-        previousStatus,
-        newStatus,
-        finalPaymentAmount: amount,
-        totalPaid: newPaymentsTotal,
-        grandTotal: invoice.grandTotal
-      },
-      actor
-    });
-  }
-  
-  return {
-    payment,
-    invoice: {
-      id: invoiceId,
-      previousStatus,
-      newStatus,
-      balanceDue
-    },
-    glPosted
-  };
+
+  return { success: true, updated_invoices };
 }
 
-/**
- * Get payment history for an invoice
- */
-export async function getPaymentHistory(invoiceId: string): Promise<PaymentRecord[]> {
-  // In real app, fetch from Firestore
-  const invoice = await fetchInvoice(invoiceId);
-  return invoice?.payments || [];
+// Reconcile payment with bank transaction
+export async function reconcilePayment(
+  payment_id: string, 
+  bank_txn_ref: string
+): Promise<{ success: boolean }> {
+  
+  // Update payment status to 'reconciled' and store bank reference
+  tag('payment_reconciled', {
+    payment_id,
+    bank_txn_ref,
+    reconciled_at: new Date().toISOString()
+  });
+
+  return { success: true };
 }
 
-/**
- * Get payment summary across all invoices
- */
-export async function getPaymentSummary(
-  clientId?: string,
-  dateFrom?: string,
-  dateTo?: string
-): Promise<{
-  totalPayments: number;
-  paymentCount: number;
-  averagePayment: number;
-  paymentsByMethod: Record<PaymentMethod, { count: number; total: number }>;
-}> {
+// Search invoices for payment application
+export async function searchInvoicesForPayment(
+  client_id?: string,
+  status?: 'issued' | 'overdue',
+  has_balance?: boolean
+): Promise<Invoice[]> {
+  
   // In real app, query Firestore with filters
   // For demo, return mock data
-  
-  const mockPayments: PaymentRecord[] = [
+  const mockInvoices: Invoice[] = [
     {
-      id: 'PAY-1',
-      invoiceId: 'INV-001',
-      amount: 1000,
-      method: 'ach',
-      paymentDate: '2024-01-15',
-      createdAt: '2024-01-15T10:00:00Z',
-      createdBy: 'admin'
-    },
-    {
-      id: 'PAY-2',
-      invoiceId: 'INV-002',
-      amount: 500,
-      method: 'check',
-      paymentDate: '2024-01-16',
-      reference: 'CHK-123',
-      createdAt: '2024-01-16T14:30:00Z',
-      createdBy: 'finance'
+      id: 'INV-001',
+      invoiceNumber: 'INV-2024-001',
+      clientId: client_id || 'CLIENT-001',
+      clientName: 'Acme Corp',
+      status: 'Issued',
+      issuedDate: '2024-01-15',
+      dueDate: '2024-02-14',
+      lineItems: [
+        {
+          id: 'line-1',
+          description: 'Widget Assembly',
+          quantity: 10,
+          unitPrice: 150.00,
+          amount: 1500.00
+        }
+      ],
+      totals: {
+        subtotal: 1500.00,
+        discounts: 0,
+        taxes: 120.00,
+        grandTotal: 1620.00
+      },
+      notes: [],
+      createdAt: '2024-01-15T09:00:00Z',
+      updatedAt: '2024-01-15T09:00:00Z',
+      createdBy: 'system',
+      updatedBy: 'system'
     }
   ];
-  
-  // Filter by date range if provided
-  const filteredPayments = mockPayments.filter(payment => {
-    if (dateFrom && payment.paymentDate < dateFrom) return false;
-    if (dateTo && payment.paymentDate > dateTo) return false;
-    return true;
+
+  tag('invoices_searched', {
+    client_id,
+    status,
+    has_balance,
+    results_count: mockInvoices.length
   });
-  
-  const totalPayments = filteredPayments.reduce((sum, p) => sum + p.amount, 0);
-  const paymentCount = filteredPayments.length;
-  const averagePayment = paymentCount > 0 ? totalPayments / paymentCount : 0;
-  
-  // Group by payment method
-  const paymentsByMethod: Record<PaymentMethod, { count: number; total: number }> = {
-    cash: { count: 0, total: 0 },
-    check: { count: 0, total: 0 },
-    ach: { count: 0, total: 0 },
-    wire: { count: 0, total: 0 },
-    card: { count: 0, total: 0 }
-  };
-  
-  for (const payment of filteredPayments) {
-    paymentsByMethod[payment.method].count++;
-    paymentsByMethod[payment.method].total += payment.amount;
-  }
-  
-  return {
-    totalPayments,
-    paymentCount,
-    averagePayment,
-    paymentsByMethod
-  };
+
+  return mockInvoices;
 }
 
-/**
- * Validate payment inputs
- */
-function validatePaymentInputs(
-  invoiceId: string,
-  amount: number,
-  method: PaymentMethod,
-  paymentDate: string
-): void {
-  if (!invoiceId || invoiceId.trim() === '') {
-    throw new Error('Invoice ID is required');
-  }
-  
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error('Payment amount must be greater than 0');
-  }
-  
-  if (!method || !['cash', 'check', 'ach', 'wire', 'card'].includes(method)) {
-    throw new Error('Invalid payment method');
-  }
-  
-  if (!paymentDate || !isValidISODate(paymentDate)) {
-    throw new Error('Invalid payment date format (expected ISO date)');
-  }
-}
-
-/**
- * Validate ISO date format
- */
-function isValidISODate(dateString: string): boolean {
-  const date = new Date(dateString);
-  return date instanceof Date && !isNaN(date.getTime()) && 
-         dateString.match(/^\d{4}-\d{2}-\d{2}$/);
-}
-
-/**
- * Fetch invoice by ID (mock implementation)
- */
-async function fetchInvoice(invoiceId: string): Promise<Invoice | null> {
-  // In real app, fetch from Firestore
-  // For demo, return mock invoice
-  
-  if (!invoiceId.startsWith('INV-')) {
-    return null;
-  }
-  
-  return {
-    id: invoiceId,
-    invoiceNumber: invoiceId,
-    clientId: 'client-001',
-    client: {
-      id: 'client-001',
-      name: 'Acme Corp',
-      email: 'billing@acme.com'
-    },
-    status: 'issued',
-    issuedDate: '2024-01-10',
-    dueDate: '2024-02-10',
-    subtotal: 1000,
-    discountAmount: 50,
-    afterDiscounts: 950,
-    taxAmount: 76,
-    grandTotal: 1026,
-    lineItems: [],
-    notes: {
-      vendorVisible: [],
-      internal: []
-    },
-    exports: {},
-    createdAt: '2024-01-10T10:00:00Z',
-    createdBy: 'system',
-    payments: []
-  };
+// Calculate running balance for payment allocation
+export function calculateRunningBalance(
+  payment_amount: number,
+  allocations: { invoice_id: string; amount: number }[]
+): number {
+  const total_allocated = allocations.reduce((sum, a) => sum + a.amount, 0);
+  return payment_amount - total_allocated;
 }

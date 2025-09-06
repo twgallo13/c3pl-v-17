@@ -5,7 +5,7 @@
 
 import { logEvent, stamp } from './build-log';
 
-const tag = stamp('V17.1.3', 'export-parity');
+const tag = stamp('V17.1.4', 'export-parity');
 
 export type ExportFormat = 'pdf' | 'csv' | 'xlsx';
 

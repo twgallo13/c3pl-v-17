@@ -14,7 +14,7 @@ import { useKV } from '@github/spark/hooks';
 import { logEvent, stamp } from '@/lib/build-log';
 import type { UserRole, Invoice } from '@/lib/types';
 
-const tag = stamp('V17.1.3', 'finance-dashboard');
+const tag = stamp('V17.1.4', 'finance-dashboard');
 
 interface FinanceDashboardProps {
   userRole: UserRole;
@@ -336,18 +336,54 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
         {/* AR Aging */}
         <Card>
           <CardHeader>
-            <CardTitle>AR Aging</CardTitle>
+            <CardTitle>AR Aging Analysis</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Click on any bucket to view filtered invoices
+            </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {arAging.map((range) => (
-                <div key={range.range} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                  <div>
+                <Button
+                  key={range.range}
+                  variant="ghost"
+                  className="w-full h-auto p-4 justify-between hover:bg-muted/50"
+                  onClick={() => {
+                    // In real app, this would navigate to filtered invoice list
+                    tag('ar_aging_bucket_clicked', {
+                      bucket: range.range,
+                      count: range.count,
+                      amount: range.amount
+                    });
+                  }}
+                >
+                  <div className="text-left">
                     <p className="font-medium">{range.range}</p>
                     <p className="text-sm text-muted-foreground">{range.count} invoices</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-lg">{formatCurrency(range.amount)}</p>
+                    <div className="w-32 bg-secondary rounded-full h-2 mt-1">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min(100, (range.amount / calculateTotalAR()) * 100)}%`
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Button>
+              ))}
+            </div>
+            
+            <div className="mt-6 pt-4 border-t">
+              <div className="flex justify-between items-center">
+                <span className="font-medium">Total Outstanding</span>
+                <span className="font-bold text-xl">{formatCurrency(calculateTotalAR())}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
                     <p className="text-sm text-muted-foreground">
                       {((range.amount / calculateTotalAR()) * 100).toFixed(1)}%
                     </p>

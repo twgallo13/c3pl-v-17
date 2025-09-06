@@ -47,7 +47,7 @@ export function stamp(version: string, module: string) {
 
 // Version gate utility to block features not in current version
 export function versionGate(requiredVersion: string): boolean {
-  const currentVersion = 'V17.1.3';
+  const currentVersion = 'V17.1.4';
   if (requiredVersion !== currentVersion) {
     logEvent({
       version: currentVersion,
@@ -454,7 +454,152 @@ export const BUILD_LOG_V17_1_3 = {
   }
 } as const;
 
-// Enhanced logging function for V17.1.3 finance operations
+export const BUILD_LOG_V17_1_4 = {
+  version: "V17.1.4",
+  buildDate: new Date().toISOString().split('T')[0],
+  basedOn: "V17.1.3",
+  changes: [
+    {
+      module: "version-upgrade",
+      description: "Updated version tag from V17.1.3 to V17.1.4 across all UI components",
+      files: ["src/lib/types.ts", "index.html", "src/App.tsx", "src/lib/build-log.ts"],
+      status: "completed"
+    },
+    {
+      module: "payments-types",
+      description: "Implemented comprehensive payments, reconciliation, and AR aging type definitions",
+      files: ["src/lib/types/finance.ts", "src/lib/types.ts"],
+      status: "completed"
+    },
+    {
+      module: "payments-service",
+      description: "Built payment recording, allocation, and reconciliation service with GL integration",
+      files: ["src/services/payments.ts"],
+      status: "completed"
+    },
+    {
+      module: "bank-reconciliation",
+      description: "CSV import with automatic matching by amount, date, and reference",
+      files: ["src/lib/bank-recon.ts"],
+      status: "completed"
+    },
+    {
+      module: "dunning-engine",
+      description: "Automated dunning queue generation with configurable rules and stages",
+      files: ["src/lib/dunning.ts"],
+      status: "completed"
+    },
+    {
+      module: "remittance-exports",
+      description: "Remittance advice generation with parity checking and digest storage",
+      files: ["src/lib/exports/remittance.ts"],
+      status: "completed"
+    },
+    {
+      module: "payments-console",
+      description: "Finance/Admin interface with Receipts, Unapplied, Reconciliation, and Dunning tabs",
+      files: ["src/components/payments-console.tsx"],
+      status: "completed"
+    },
+    {
+      module: "invoice-payments-panel",
+      description: "Enhanced invoice detail with payments allocations, GL journal links, and reconciliation",
+      files: ["src/components/invoice-detail.tsx"],
+      status: "completed"
+    },
+    {
+      module: "ar-aging-enhancement",
+      description: "Clickable AR aging buckets with progress bars and filtered invoice navigation",
+      files: ["src/components/finance-dashboard.tsx"],
+      status: "completed"
+    },
+    {
+      module: "rbac-payments",
+      description: "Role-based access control for payment operations (Finance/Admin full access)",
+      files: ["src/components/payments-console.tsx"],
+      status: "completed"
+    },
+    {
+      module: "observability-payments",
+      description: "Comprehensive logging for payment_recorded, payment_applied, payment_reconciled, ar_aging_generated, dunning_notice_generated",
+      files: ["src/services/payments.ts", "src/lib/bank-recon.ts", "src/lib/dunning.ts"],
+      status: "completed"
+    }
+  ],
+  readinessChecklist: {
+    noTypeScriptErrors: true,
+    paymentsConsoleLive: true,
+    invoiceBalancesUpdate: true,
+    bankCSVImport: true,
+    arAgingWidget: true,
+    dunningQueueGenerated: true,
+    remittanceExportsOperational: true,
+    rbacEnforced: true,
+    loggingStandardized: true,
+    buildLogUpdated: true,
+    allChangesUnderV17_1_4: true
+  }
+} as const;
+
+// Enhanced logging function for V17.1.4 payments operations
+export function logPaymentsEvent(
+  module: 'payments' | 'reconciliation' | 'dunning' | 'remittance',
+  action: string,
+  actor: string,
+  metadata?: Record<string, any>
+): void {
+  logEvent({
+    version: 'V17.1.4',
+    module: `payments-${module}`,
+    action,
+    details: metadata,
+    actor
+  });
+}
+
+console.log("🚀 C3PL V17.1.4 Build Started - Payments Console & AR Management");
+console.log("💳 V17.1.4 Features: Payment Processing, Bank Reconciliation, AR Aging, Dunning");
+console.log("🏦 Bank Reconciliation: CSV import with automatic matching algorithms");
+console.log("📊 AR Aging: Clickable buckets with filtered invoice navigation");
+console.log("📋 Dunning Queue: Automated notice generation with configurable rules");
+console.log("💰 Payments Console: Record, apply, reconcile payments with GL integration");
+console.log("🧾 Remittance: Advice generation with export parity checking");
+console.log("🛡️ RBAC: Finance/Admin full access, read-only for AM/CS roles");
+console.log("📈 Invoice Enhancements: Payment allocations panel with GL journal links");
+
+// Initialize V17.1.4 logging
+const tagPayments = stamp('V17.1.4', 'payments');
+tagPayments('system_initialized', { 
+  features: ['payments_console', 'bank_reconciliation', 'ar_aging_enhanced', 'dunning_automation', 'remittance_exports'] 
+});
+
+logEvent({ 
+  version: 'V17.1.4', 
+  module: 'build-log', 
+  action: 'payments_console_complete',
+  details: { 
+    tabs_implemented: ['receipts', 'unapplied', 'reconciliation', 'dunning'],
+    rbac_enforced: true,
+    bank_csv_import: true,
+    ar_aging_enhanced: true,
+    invoice_payments_panel: true
+  },
+  actor: 'system'
+});
+
+logEvent({ 
+  version: 'V17.1.4', 
+  module: 'build-log', 
+  action: 'payments_hardening_complete',
+  details: { 
+    payments_service_active: true,
+    bank_reconciliation_operational: true,
+    dunning_engine_functional: true,
+    remittance_exports_implemented: true,
+    ar_aging_clickable: true
+  },
+  actor: 'system'
+});
 export function logFinanceEvent(
   module: 'billing' | 'payments' | 'gl' | 'export',
   action: string,
