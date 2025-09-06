@@ -1,4 +1,4 @@
-// V17.1.2-p5b — router uses registry; '/' redirects to '/dashboards'
+// V17.1.2-p5c — router uses registry; '/' redirects to '/dashboards'
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
@@ -7,7 +7,7 @@ import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p5b';
+const VERSION = 'V17.1.2-p5c';
 setActiveVersion(VERSION);
 
 function Guarded({ element, roles }: { element: JSX.Element; roles?: Role[] }) {
