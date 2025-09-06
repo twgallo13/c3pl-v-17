@@ -7,7 +7,7 @@ import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p8e';
+const VERSION = 'V17.1.2-p8f';
 setActiveVersion(VERSION);
 
 // lazy pages
@@ -16,12 +16,12 @@ const ProductDetail = React.lazy(() => import('@/components/product-detail'));
 
 function landingFor(role: Role): string {
   switch (role) {
-    case 'Admin':          return '/dashboards';
-    case 'Finance':        return '/dashboards/finance';
-    case 'Operations':     return '/dashboards/ops';
-    case 'CustomerService':return '/dashboards/cs';
-    case 'Vendor':         return '/dashboards/vendor';
-    default:               return '/dashboards';
+    case 'Admin': return '/dashboards';
+    case 'Finance': return '/dashboards/finance';
+    case 'Operations': return '/dashboards/ops';
+    case 'CustomerService': return '/dashboards/cs';
+    case 'Vendor': return '/dashboards/vendor';
+    default: return '/dashboards';
   }
 }
 
