@@ -1,20 +1,26 @@
-// V17.1.2-p7-min — router uses registry; '/' redirects to '/dashboards'
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ROUTES } from '@/routes/registry';
-import { AppShell } from '@/components/layout/AppShell';
-import { getRole, subscribe, type Role } from '@/lib/role-store';
-import { checkAccess } from '@/lib/rbac';
-import { setActiveVersion } from '@/lib/version';
+// V17.1.2-p7a — router uses registry; '/' redirects to '/finance'
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ROUTES } from "@/routes/registry";
+import { AppShell } from "@/components/layout/AppShell";
+import { getRole, subscribe, type Role } from "@/lib/role-store";
+import { checkAccess } from "@/lib/rbac";
+import { setActiveVersion } from "@/lib/version";
 
-const VERSION = 'V17.1.2-p7-min';
+const VERSION = "V17.1.2-rma-sync-hotfix";
 setActiveVersion(VERSION);
 
-function Guarded({ element, roles }: { element: JSX.Element; roles?: Role[] }) {
+function Guarded({
+  element,
+  roles,
+}: {
+  element: React.ReactElement;
+  roles?: Role[];
+}) {
   const [role, setRole] = React.useState<Role>(getRole());
   React.useEffect(() => subscribe(setRole), []);
   const access = checkAccess([role], roles ?? []);
-  return access.allowed ? element : <Navigate to="/dashboards" replace />;
+  return access.allowed ? element : <Navigate to="/finance" replace />;
 }
 
 export default function App() {
@@ -23,12 +29,17 @@ export default function App() {
       <AppShell version={VERSION}>
         <React.Suspense fallback={<div className="p-4">Loading…</div>}>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboards" replace />} />
-            {ROUTES.map(r => (
+            <Route path="/" element={<Navigate to="/finance" replace />} />
+            {ROUTES.map((r) => (
               <Route
                 key={r.path}
                 path={r.path}
-                element={<Guarded roles={r.roles} element={React.createElement(r.component)} />}
+                element={
+                  <Guarded
+                    roles={r.roles}
+                    element={React.createElement(r.component)}
+                  />
+                }
               />
             ))}
             <Route
@@ -36,7 +47,9 @@ export default function App() {
               element={
                 <div className="rounded border p-6">
                   <h3 className="font-medium mb-2">Page not found</h3>
-                  <p className="text-sm text-muted-foreground">Use the navigation to access available workflows.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Use the navigation to access available workflows.
+                  </p>
                 </div>
               }
             />

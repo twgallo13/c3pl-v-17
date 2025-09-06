@@ -32,8 +32,13 @@
   ],
   "exclude": [
     "**/*.test.ts",
-    "**/*.spec.ts", 
+    "**/*.spec.ts",
     "**/__tests__/**",
-    "src/test-*.ts"
+    "src/test-*.ts",
+    "node_modules",
+    "dist",
+    "build",
+    ".spark.tmp",
+    "src/debugger/**"
   ]
 }
