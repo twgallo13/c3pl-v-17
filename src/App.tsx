@@ -11,7 +11,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Badge } from '@/components/ui/badge';
 
 // Initialize version and guards
-setActiveVersion('V17.1.2-p4');
+setActiveVersion('V17.1.2-p4a');
 initializeVersionLock();
 
 function AppShell({ children }: { children: React.ReactNode }) {
@@ -91,7 +91,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         <header className="flex items-center justify-between px-6 py-4 border-b bg-card">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold">C3PL</h1>
-            <Badge variant="outline" className="text-xs">V17.1.2-p4</Badge>
+            <Badge variant="outline" className="text-xs">V17.1.2-p4a</Badge>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
