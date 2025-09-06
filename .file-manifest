@@ -50969,6 +50969,7 @@ src/components/payments-console-placeholder.tsx
 src/components/payments-console.tsx
 src/components/picking-app.tsx
 src/components/product-detail.tsx
+src/components/products-view-test.tsx
 src/components/products-view.tsx
 src/components/quote-generator.tsx
 src/components/quote-simulator.tsx
