@@ -35,7 +35,7 @@ function App() {
   
   // Initialize version and guards on mount
   useEffect(() => {
-    setActiveVersion('V17.1.2-p3b');
+    setActiveVersion('V17.1.2-p3c');
     initializeVersionLock();
   }, []);
   
@@ -118,7 +118,7 @@ function App() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.2-p3b</span>
+                      <span className="ml-2 font-mono">V17.1.2-p3c</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Environment:</span>
