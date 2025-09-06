@@ -1,4 +1,4 @@
-// V17.1.2-p5 — Admin Sitemap (route inventory)
+// V17.1.2-p5a — Admin Sitemap (compile repair)
 import React from 'react';
 import { ROUTES } from '@/routes/registry';
 
@@ -6,6 +6,7 @@ export default function AdminSitemap() {
   return (
     <div className="rounded border p-4">
       <h3 className="font-medium mb-3">Sitemap</h3>
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -24,9 +25,9 @@ export default function AdminSitemap() {
                 <td className="py-2 pr-3">{r.title}</td>
                 <td className="py-2 pr-3">{r.path}</td>
                 <td className="py-2 pr-3">{r.workflow}</td>
-                <td className="py-2 pr-3">{r.roles?.join(', ') || '—'}</td>
+                <td className="py-2 pr-3">{r.roles?.join(', ') ?? '—'}</td>
                 <td className="py-2 pr-3">{r.visible !== false ? 'Yes' : 'No'}</td>
-                <td className="py-2">{r.version || '—'}</td>
+                <td className="py-2">{r.version ?? '—'}</td>
               </tr>
             ))}
           </tbody>
