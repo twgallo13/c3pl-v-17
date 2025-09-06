@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { VERSION } from "@/lib/types";
+import { getActiveVersion } from "@/lib/version";
 
 export function VersionDisplay() {
   return (
@@ -7,7 +7,7 @@ export function VersionDisplay() {
       variant="outline" 
       className="font-mono text-sm font-semibold bg-primary/10 text-primary border-primary/20"
     >
-      {VERSION}
+      {getActiveVersion()}
     </Badge>
   );
 }

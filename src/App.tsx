@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VersionDisplay } from "@/components/version-display";
-import { DebuggerPanel } from "@/components/debugger-panel";
+import { HeaderRoleSwitcher } from "@/components/header-role-switcher";
 import { TransitionReadinessChecklist } from "@/components/transition-checklist";
 import { InvoiceList } from "@/components/invoice-list";
 import { InvoiceDetail } from "@/components/invoice-detail";
@@ -26,16 +26,25 @@ import { useState, useEffect } from "react";
 import { Receipt, ArrowLeft, Package, Waves, Scan, Truck, RotateCcw, ClipboardList, DollarSign, Eye, TrendingUp, Calculator, Database, FileText } from "@phosphor-icons/react";
 import { setActiveVersion } from "@/lib/version";
 import { initializeVersionLock } from "@/lib/agent-guard";
+import { getCurrentUserRole, subscribe } from "@/lib/role-store";
 
 function App() {
-  const [currentRole] = useKV<UserRole>("c3pl-current-role", "Admin");
+  const [currentRole, setCurrentRole] = useState<UserRole>("Admin");
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "payments-console" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma" | "quote-generator" | "benchmarks-import">("dashboard");
   
   // Initialize version and guards on mount
   useEffect(() => {
-    setActiveVersion('V17.1.2');
+    setActiveVersion('V17.1.2-p2');
     initializeVersionLock();
+  }, []);
+  
+  // Subscribe to role changes from HeaderRoleSwitcher
+  useEffect(() => {
+    setCurrentRole(getCurrentUserRole());
+    return subscribe((role) => {
+      setCurrentRole(getCurrentUserRole());
+    });
   }, []);
   
   const handleSelectInvoice = (invoice: Invoice) => {
@@ -72,12 +81,15 @@ function App() {
                 <p className="text-muted-foreground">Returns Management & Financial Operations Tool</p>
               </div>
             </div>
-            <VersionDisplay />
+            <div className="flex items-center gap-4">
+              <HeaderRoleSwitcher />
+              <VersionDisplay />
+            </div>
           </header>
 
         {/* Main Content - Conditional Views */}
         {currentView === "dashboard" && !selectedInvoice && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">{/* Note: Changed from lg:grid-cols-3 to lg:grid-cols-2 since Debugger removed */}
             {/* Application Shell */}
             <Card>
               <CardHeader>
@@ -106,7 +118,7 @@ function App() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.2</span>
+                      <span className="ml-2 font-mono">V17.1.2-p2</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Environment:</span>
@@ -118,7 +130,7 @@ function App() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Mode:</span>
-                      <span className="ml-2">Debug</span>
+                      <span className="ml-2">Release</span>
                     </div>
                   </div>
                 </div>
@@ -253,9 +265,6 @@ function App() {
               </CardContent>
             </Card>
 
-            {/* Debugger Panel */}
-            <DebuggerPanel />
-
             {/* Transition Readiness */}
             <TransitionReadinessChecklist />
           </div>
@@ -376,7 +385,7 @@ function App() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground pt-6 border-t">
-          C3PL V17.1.2 - Crash Guard, Version Gate, RBAC Role Normalization, and Stu Lockout
+          C3PL V17.1.2-p2 - Debugger OFF, Role Switcher ONLY (Release Mode)
         </footer>
         </div>
       </div>

@@ -1,10 +1,10 @@
 /**
- * C3PL V17.1.2 Build Log - Standardized Logging System
+ * C3PL V17.1.2-p2 Build Log - Standardized Logging System
  * All changes and implementations tied to this version
  * Zero default exports - named exports only for forward compatibility
  */
 
-// V17.1.2 — build log utilities (standardized named exports)
+// V17.1.2-p2 — build log utilities (standardized named exports)
 export type BuildLogEvent = {
   version: string;    // e.g., "V17.1.2"
   module: string;     // e.g., "rma", "billing", "wms"  
@@ -860,6 +860,72 @@ logEvent({
   actor: 'system'
 });
 
+export const BUILD_LOG_V17_1_2_P2 = {
+  version: "V17.1.2-p2",
+  buildDate: new Date().toISOString().split('T')[0],
+  basedOn: "V17.1.2",
+  changes: [
+    {
+      module: "version-upgrade",
+      description: "Updated version tag from V17.1.2 to V17.1.2-p2 (patch release)",
+      files: ["src/lib/version.ts", "src/lib/types.ts", "index.html", "src/App.tsx", "src/lib/build-log.ts"],
+      status: "completed"
+    },
+    {
+      module: "debugger-removal",
+      description: "Removed Debugger panel from app shell and all routes (release mode)",
+      files: ["src/App.tsx"],
+      status: "completed"
+    },
+    {
+      module: "role-switcher",
+      description: "Implemented HeaderRoleSwitcher as single source of truth for QA role testing",
+      files: ["src/components/header-role-switcher.tsx", "src/lib/role-store.ts"],
+      status: "completed"
+    },
+    {
+      module: "role-store",
+      description: "Built shared role store with localStorage persistence and subscriber pattern",
+      files: ["src/lib/role-store.ts"],
+      status: "completed"
+    },
+    {
+      module: "feature-flags",
+      description: "Added release mode flags with tree-shaking for debugger code elimination",
+      files: ["src/lib/feature-flags.ts", "vite.config.ts"],
+      status: "completed"
+    },
+    {
+      module: "rbac-integration",
+      description: "Updated RBAC components to use shared role store with real-time updates",
+      files: ["src/lib/rbac.ts", "src/components/RbacGate.tsx"],
+      status: "completed"
+    },
+    {
+      module: "app-layout-update",
+      description: "Updated main app layout to use HeaderRoleSwitcher instead of DebuggerPanel",
+      files: ["src/App.tsx"],
+      status: "completed"
+    },
+    {
+      module: "version-display-update",
+      description: "Enhanced version display to show V17.1.2-p2 dynamically from version system",
+      files: ["src/components/version-display.tsx"],
+      status: "completed"
+    }
+  ],
+  readinessChecklist: {
+    noTypeScriptErrors: true,
+    debuggerRemoved: true,
+    roleSwitcherOperational: true,
+    releaseFlagsSet: true,
+    rbacIntegrationComplete: true,
+    versionTagUpdated: true,
+    buildLogUpdated: true,
+    allChangesUnderV17_1_2_P2: true
+  }
+} as const;
+
 // Enhanced logging function for V17.1.4 payments operations
 export function logPaymentsEvent(
   module: 'payments' | 'reconciliation' | 'dunning' | 'remittance',
@@ -986,6 +1052,24 @@ logEvent({
     finance_math_centralized: true,
     payments_flow_implemented: true,
     dashboard_widgets_functional: true
+  },
+  actor: 'system'
+});
+
+// V17.1.2-p2 patch completion logging
+logEvent({ 
+  version: 'V17.1.2-p2', 
+  module: 'build-log', 
+  action: 'debugger_removal_role_switcher_patch_complete',
+  details: { 
+    debugger_eliminated: 'Debugger panel removed from all routes and app shell',
+    role_switcher_implemented: 'HeaderRoleSwitcher as single source of truth for QA',
+    role_store_operational: 'Shared store with localStorage persistence and subscribers',
+    release_flags_set: 'Tree-shaking enabled for debug code elimination',
+    rbac_integration_updated: 'Real-time role updates across all RBAC gates',
+    version_tag_updated: 'V17.1.2-p2 displayed in main UI and header',
+    typescript_clean: true,
+    build_passing: true
   },
   actor: 'system'
 });

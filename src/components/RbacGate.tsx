@@ -1,24 +1,32 @@
-// V17.1.2 — RBAC UI gate (TSX)
+// V17.1.2-p2 — RBAC UI gate (TSX)
 import React from 'react';
 import { checkAccess, type Role } from '@/lib/rbac';
 import { logEvent } from '@/lib/build-log';
 import { getActiveVersion } from '@/lib/version';
+import { getRole, subscribe } from '@/lib/role-store';
 
 type Props = {
-  userRoles: Array<string | Role>;
+  userRoles?: Array<string | Role>; // Optional - defaults to current role from store
   requiredRoles?: Role[];
   children: React.ReactNode;
 };
 
 export function RbacGate({ userRoles, requiredRoles = [], children }: Props) {
-  const access = checkAccess(userRoles, requiredRoles);
+  const [currentRole, setCurrentRole] = React.useState<Role>(getRole());
+  
+  // Subscribe to role changes
+  React.useEffect(() => subscribe(setCurrentRole), []);
+  
+  // Use provided roles or fall back to current role from store
+  const rolesToCheck = userRoles || [currentRole];
+  const access = checkAccess(rolesToCheck, requiredRoles);
 
   if (!access.allowed) {
     logEvent({
       version: getActiveVersion(),
       module: 'rbac',
       action: 'access_denied',
-      details: { userRoles, requiredRoles, reason: access.reason }
+      details: { userRoles: rolesToCheck, requiredRoles, reason: access.reason }
     });
     
     return (

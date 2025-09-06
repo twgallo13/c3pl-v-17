@@ -1,4 +1,4 @@
-export const VERSION = "V17.1.2" as const;
+export const VERSION = "V17.1.2-p2" as const;
 
 export type UserRole = "Vendor" | "Account Manager" | "Customer Service" | "Operations" | "Admin" | "Finance" | "Associate" | "Manager";
 

@@ -1,6 +1,7 @@
-// V17.1.2 — RBAC logic
+// V17.1.2-p2 — RBAC logic
 import { logEvent } from '@/lib/build-log';
 import { getActiveVersion } from '@/lib/version';
+import { getRole } from '@/lib/role-store';
 
 export type Role = 'Vendor'|'AccountManager'|'CustomerService'|'Operations'|'Finance'|'Admin';
 
@@ -104,6 +105,11 @@ const FEATURE_SETS: Record<Role, string[]> = {
 
 // ---- rbacService export ----
 export const rbacService = {
+  /** Get current active role from role store */
+  current(): Role {
+    return getRole();
+  },
+
   /** Check access for a user role against a permission */
   checkAccess(userRole: UserRole, permission: string, actor?: string): AccessResult {
     const normalizedRole = norm(userRole);
