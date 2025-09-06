@@ -288,3 +288,5 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
     </Card>
   );
 }
+
+export default DebuggerPanel;

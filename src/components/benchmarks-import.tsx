@@ -453,3 +453,5 @@ export function BenchmarksImport({ userRole, onBack }: BenchmarksImportProps) {
     </div>
   );
 }
+
+export default BenchmarksImport;

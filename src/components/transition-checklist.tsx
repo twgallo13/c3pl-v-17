@@ -555,3 +555,5 @@ export function TransitionReadinessChecklist() {
     </Card>
   );
 }
+
+export default TransitionReadinessChecklist;

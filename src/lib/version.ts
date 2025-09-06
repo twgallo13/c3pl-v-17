@@ -1,8 +1,8 @@
-// V17.1.2-p3c — version core
+// V17.1.2-p4 — version core
 export type VersionTag = `V${number}.${number}.${number}` | `V${number}.${number}.${number}-p${number}` | `V${number}.${number}.${number}-p${number}${string}`;
 
 // active version singleton (set on boot and read everywhere)
-let _active: VersionTag = 'V17.1.2-p3f';
+let _active: VersionTag = 'V17.1.2-p4';
 
 export function setActiveVersion(v: VersionTag) {
   _active = v;

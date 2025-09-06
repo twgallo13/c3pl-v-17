@@ -579,3 +579,5 @@ export function PaymentsConsole({ userRole, onBack }: PaymentsConsoleProps) {
     </div>
   );
 }
+
+export default PaymentsConsole;

@@ -1,4 +1,4 @@
-# C3PL V17.2.0 - Product Requirements Document
+# C3PL V17.1.2-p4 - Product Requirements Document
 
 ## Version History
 - **V17.0.0**: Initial release with QA login, role switcher, console output toggle, basic debugger
@@ -9,81 +9,77 @@
 - **V17.1.3**: Finance hardening with GL posting, export parity, advanced math, and dashboard
 - **V17.1.4**: Payments Console with bank reconciliation, AR aging enhancements, and dunning automation
 - **V17.2.0**: Quote Generator wizard and Benchmarks Import with pricing engine and competitor comparison
+- **V17.1.2-p4**: Theme & Navigation Lock - Registry-driven routing, Debugger removed from shell, Dashboards Home landing
 
 ## Core Purpose & Success
 
-**Mission Statement**: C3PL is a comprehensive financial operations and warehouse management system that provides automated quote generation, benchmark data management, payment processing, bank reconciliation, and pricing intelligence with enterprise-grade audit trails.
+**Mission Statement**: C3PL is a comprehensive financial operations and warehouse management system that provides themed navigation, role-based access control, and dashboard-driven workflows with enterprise-grade audit trails.
 
 **Success Indicators**: 
-- Benchmarks import validated and committed with rollback capability
-- Quotes generated with correct line itemization and totals calculation
-- Export parity passing for all quote formats (PDF/CSV/XLSX) with stored digests
-- Competitor comparison computed and displayed with delta percentages
-- Lane resolution working with zip3 → state → country specificity
-- Discount precedence enforced (flat → percent) with correct scoping
-- All quote and benchmark operations logged with V17.2.0 version tracking
+- Themed app shell with sidebar navigation driven by explicit route registry
+- Debugger completely removed from main shell and hidden behind admin route (disabled in release)
+- Dashboards Home as default landing page with workflow tiles
+- RBAC-filtered navigation showing only accessible routes per role
+- Zero TypeScript errors with React Router implementation
+- Version V17.1.2-p4 displayed prominently in header
 
-**Experience Qualities**: Intelligent, Precise, Comparative
+**Experience Qualities**: Organized, Intuitive, Professional
 
 ## Project Classification & Approach
 
-**Complexity Level**: Complex Enterprise Application with quote generation, benchmarks management, pricing intelligence, and competitive analysis
-**Primary User Activity**: Creating, Analyzing, and Comparing - users create quotes with benchmarks, analyze pricing scenarios, and compare against competitors
+**Complexity Level**: Complex Enterprise Application with themed navigation, role-based routing, and dashboard-driven workflows
+
+**Primary User Activity**: Navigate between workflows efficiently with clear visual hierarchy and role-appropriate access
 
 ## Essential Features
 
-### V17.2.0 Quote Generator Features
+### V17.1.2-p4 Theme & Navigation Features
 
-#### 1. 5-Step Quote Generation Wizard
-- **Functionality**: Mobile-first wizard progressing through Basics → VAS → Pricing → Comparison → Summary
-- **Purpose**: Guided quote creation with progressive disclosure and mobile optimization
-- **Success Criteria**: All steps navigable, sticky totals footer, mobile-responsive design, vendor read-only mode
+#### 1. Themed App Shell with Sidebar Navigation
+- **Functionality**: Fixed sidebar with role-filtered navigation, header with version badge and role switcher
+- **Purpose**: Consistent navigation experience with clear visual hierarchy
+- **Success Criteria**: Sidebar shows only accessible routes per role, active route highlighting, mobile-responsive design
 
-#### 2. Benchmarks Import System (Admin Only)
-- **Functionality**: CSV import with validation, dry-run, commit, and rollback capabilities
-- **Purpose**: Maintain accurate benchmark data with version control and audit trail
-- **Success Criteria**: Strict CSV validation, cross-file integrity checks, import/rollback tracking, admin-only access
+#### 2. Registry-Driven Route System  
+- **Functionality**: Explicit route registry with workflow grouping and role-based access control
+- **Purpose**: Maintainable routing system with clear permissions and organization
+- **Success Criteria**: Routes load from registry, RBAC filtering works, lazy loading functional
 
-#### 3. Pricing Engine with Lane Resolution
-- **Functionality**: Specificity-based rate selection (zip3 → state → country) with discount precedence
-- **Purpose**: Accurate pricing based on geographic specificity and business rules
-- **Success Criteria**: Lane matching works correctly, discount order enforced (flat → percent), taxes applied after discounts
+#### 3. Dashboards Home Landing Page
+- **Functionality**: Workflow tiles linking to major functional areas (Finance, RMA, Sales, Admin)
+- **Purpose**: Clear entry point showing available workflows with descriptive cards
+- **Success Criteria**: All workflow tiles render, navigation links work, role-appropriate content shown
 
-#### 4. Competitor Comparison Analysis
-- **Functionality**: Side-by-side comparison with delta calculation and percentage differences
-- **Purpose**: Competitive positioning with visual indicators for win/loss scenarios  
-- **Success Criteria**: Delta amounts calculated correctly, percentage differences displayed, visual win/loss indicators
+#### 4. Debugger Removed from Shell (Release Mode)
+- **Functionality**: Debugger only accessible via hidden admin route when debug flags enabled
+- **Purpose**: Clean production interface without development tools cluttering the UI
+- **Success Criteria**: No debugger UI in release mode, hidden route works when debug enabled
 
-#### 5. Export System with Parity Validation
-- **Functionality**: PDF/CSV/XLSX exports with SHA-256 digests and parity checking
-- **Purpose**: Professional quote documentation with data integrity guarantees
-- **Success Criteria**: All export formats match UI totals, digests stored, parity validation passing
+#### 5. Version Display and Tracking
+- **Functionality**: V17.1.2-p4 badge prominently displayed in header
+- **Purpose**: Clear version identification for audit and testing purposes
+- **Success Criteria**: Version badge visible, matches build version, consistent across views
 
-#### 6. Debugger Enhancement Tools
-- **Functionality**: Quote Simulator and Import Validator in debugger panel
-- **Purpose**: Development and testing tools for pricing logic validation
-- **Success Criteria**: JSON input/output testing, CSV validation preview, error reporting
-
-### V17.2.0 RBAC & Access Control
-- **Sales/Account Manager**: Create and export quotes, read benchmarks
-- **Admin**: Full benchmark import/export/rollback, all quote functions
-- **Vendor**: Read-only access to quotes sent to them, no editing capabilities
-- **Finance/CS/Ops**: Read access to quotes and benchmarks, no creation rights
+### V17.1.2-p4 RBAC & Access Control
+- **Finance/Admin**: Full access to finance workflows and admin tools
+- **Operations**: Access to RMA adjustments and operational dashboards  
+- **Account Manager**: Access to sales tools and quote generation
+- **Vendor**: Read-only access to relevant finance and quote exports
 
 ## Design Direction
 
 ### Visual Tone & Identity
-**Emotional Response**: Intelligent precision, competitive confidence, analytical clarity
-**Design Personality**: Strategic intelligence with enterprise-grade data presentation
-**Visual Metaphors**: Pricing wizard, competitive dashboard, benchmark laboratory
-**Simplicity Spectrum**: Progressive disclosure with mobile-first responsive design
+**Emotional Response**: Professional organization, workflow clarity, role-appropriate access
+**Design Personality**: Clean enterprise interface with clear navigation hierarchy
+**Visual Metaphors**: Dashboard tiles, workflow organization, role-based access gates  
+**Simplicity Spectrum**: Clean sidebar navigation with contextual content areas
 
 ### Color Strategy
-**Color Scheme Type**: Complementary with professional data visualization
-**Primary Color**: Deep blue (oklch(0.35 0.15 250)) for primary actions and quote totals
-**Secondary Colors**: Muted blue-gray for supporting quote elements  
-**Accent Color**: Warm orange (oklch(0.62 0.25 40)) for competitive deltas and highlights
-**Status Colors**:
+**Color Scheme Type**: Professional monochromatic with accent highlights
+**Primary Color**: Deep blue (oklch(0.35 0.15 250)) for navigation and primary actions
+**Secondary Colors**: Blue-gray tones for supporting navigation elements  
+**Accent Color**: Warm orange (oklch(0.62 0.25 40)) for active states and highlights
+**Navigation Colors**:
 - Green (profitable quotes, validation pass)
 - Red (competitive disadvantage, validation errors) 
 - Yellow (warnings, margin alerts)

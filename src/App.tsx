@@ -1,396 +1,156 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { VersionDisplay } from "@/components/version-display";
-import { HeaderRoleSwitcher } from "@/components/header-role-switcher";
-import { TransitionReadinessChecklist } from "@/components/transition-checklist";
-import { InvoiceList } from "@/components/invoice-list";
-import { InvoiceDetail } from "@/components/invoice-detail";
-import { ReceivingScreen } from "@/components/receiving-screen";
-import { WaveControlDashboard } from "@/components/wave-control-dashboard";
-import { PickingApp } from "@/components/picking-app";
-import { PackoutStation } from "@/components/packout-station";
-import RMAIntakeScreen from "@/components/rma-intake";
-import RMAManagerConsole from "@/components/rma-manager-console";
-import RMAFinanceView from "@/components/rma-finance-view";
-import VendorPortalRMA from "@/components/vendor-portal-rma";
-import { FinanceDashboard } from "@/components/finance-dashboard";
-import { RMAAdjustmentsView } from "@/components/rma-adjustments-view";
-import { PaymentsConsole } from "@/components/payments-console";
-import { QuoteGenerator } from "@/components/quote-generator";
-import { BenchmarksImport } from "@/components/benchmarks-import";
-import { ErrorBoundary } from "@/components/error-boundary";
-import { useKV } from "@github/spark/hooks";
-import { UserRole, Invoice } from "@/lib/types";
-import { useState, useEffect } from "react";
-import { Receipt, ArrowLeft, Package, Waves, Scan, Truck, RotateCcw, ClipboardList, DollarSign, Eye, TrendingUp, Calculator, Database, FileText } from "@phosphor-icons/react";
-import { setActiveVersion } from "@/lib/version";
-import { initializeVersionLock } from "@/lib/agent-guard";
-import { getCurrentUserRole, subscribe } from "@/lib/role-store";
+// V17.1.2-p4 — app shell + router from registry
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { ROUTES } from '@/routes/registry';
+import { getRole, subscribe, type Role } from '@/lib/role-store';
+import { checkAccess } from '@/lib/rbac';
+import { setActiveVersion } from '@/lib/version';
+import { initializeVersionLock } from '@/lib/agent-guard';
+import { HeaderRoleSwitcher } from '@/components/header/role-switcher';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { Badge } from '@/components/ui/badge';
 
-function App() {
-  const [currentRole, setCurrentRole] = useState<UserRole>("Admin");
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "payments-console" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma" | "quote-generator" | "benchmarks-import">("dashboard");
+// Initialize version and guards
+setActiveVersion('V17.1.2-p4');
+initializeVersionLock();
+
+function AppShell({ children }: { children: React.ReactNode }) {
+  const [role, setRole] = React.useState<Role>(getRole());
+  const location = useLocation();
   
-  // Initialize version and guards on mount
-  useEffect(() => {
-    setActiveVersion('V17.1.2-p3f');
-    initializeVersionLock();
+  React.useEffect(() => {
+    return subscribe(setRole);
   }, []);
-  
-  // Subscribe to role changes from HeaderRoleSwitcher
-  useEffect(() => {
-    setCurrentRole(getCurrentUserRole());
-    return subscribe((role) => {
-      setCurrentRole(getCurrentUserRole());
-    });
-  }, []);
-  
-  const handleSelectInvoice = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-  };
 
-  const handleBackToList = () => {
-    setSelectedInvoice(null);
-  };
+  const visibleRoutes = ROUTES.filter(r => r.visible !== false);
+  const roleAllowedRoutes = visibleRoutes.filter(route => {
+    if (!route.roles?.length) return true;
+    const access = checkAccess([role], route.roles);
+    return access.allowed;
+  });
 
-  const handleBackToDashboard = () => {
-    setCurrentView("dashboard");
-    setSelectedInvoice(null);
-  };
-
-  // In a real app, this would come from user authentication
-  const vendorId = currentRole === "Vendor" ? "vendor-001" : undefined;
-  
   return (
-    <ErrorBoundary actor={`user-${currentRole}`} module="app">
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
-          {/* Header */}
-          <header className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {(currentView !== "dashboard") && (
-                <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Dashboard
-                </Button>
-              )}
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">C3PL</h1>
-                <p className="text-muted-foreground">Returns Management & Financial Operations Tool</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <HeaderRoleSwitcher />
-              <VersionDisplay />
-            </div>
-          </header>
-
-        {/* Main Content - Conditional Views */}
-        {currentView === "dashboard" && !selectedInvoice && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">{/* Note: Changed from lg:grid-cols-3 to lg:grid-cols-2 since Debugger removed */}
-            {/* Application Shell */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Application Shell</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Current Role:</span>
-                  <Badge variant="secondary">{currentRole}</Badge>
-                </div>
-                
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <h3 className="font-medium mb-2">Role Permissions</h3>
-                  <div className="text-sm text-muted-foreground">
-                    {currentRole === "Admin" && "Full system access and configuration"}
-                    {currentRole === "Finance" && "Financial operations and invoice management"}
-                    {currentRole === "Operations" && "Operational controls and monitoring"}
-                    {currentRole === "Customer Service" && "Customer support and ticket management"}
-                    {currentRole === "Account Manager" && "Account oversight and client relations"}
-                    {currentRole === "Vendor" && "Vendor-specific tools and data access"}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-card border rounded-lg">
-                  <h3 className="font-medium mb-2">System Status</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.2-p3f</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Environment:</span>
-                      <span className="ml-2">QA Testing</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Status:</span>
-                      <span className="ml-2 text-green-600">Ready</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Mode:</span>
-                      <span className="ml-2">Release</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Button 
-                    onClick={() => setCurrentView("invoices")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Receipt className="h-4 w-4 mr-2" />
-                    Financial Management
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("finance-dashboard")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Finance Dashboard
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("payments-console")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Payments Console
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("rma-adjustments")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Calculator className="h-4 w-4 mr-2" />
-                    RMA Adjustments
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("quote-generator")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Quote Generator
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("benchmarks-import")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Database className="h-4 w-4 mr-2" />
-                    Benchmarks Import
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("rma-intake")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    RMA Intake
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("rma-manager")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <ClipboardList className="h-4 w-4 mr-2" />
-                    RMA Manager Console
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("rma-finance")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    RMA Finance View
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("vendor-portal-rma")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Vendor Portal RMA
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("receiving")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Package className="h-4 w-4 mr-2" />
-                    Receiving Station
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("wave-control")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Waves className="h-4 w-4 mr-2" />
-                    Wave Control
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("picking")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Scan className="h-4 w-4 mr-2" />
-                    Picking App
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setCurrentView("packout")}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Truck className="h-4 w-4 mr-2" />
-                    Packout Station
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Transition Readiness */}
-            <TransitionReadinessChecklist />
-          </div>
-        )}
-
-        {/* Invoice Views */}
-        {currentView === "invoices" && !selectedInvoice && (
-          <InvoiceList
-            userRole={currentRole}
-            vendorId={vendorId}
-            onSelectInvoice={handleSelectInvoice}
-          />
-        )}
-
-        {/* Finance Views */}
-        {currentView === "finance-dashboard" && (
-          <FinanceDashboard
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "payments-console" && (
-          <PaymentsConsole
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "rma-adjustments" && (
-          <RMAAdjustmentsView
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {/* WMS Views */}
-        {currentView === "receiving" && (
-          <ReceivingScreen
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "wave-control" && (
-          <WaveControlDashboard
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "picking" && (
-          <PickingApp
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "packout" && (
-          <PackoutStation
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {/* RMA Views */}
-        {currentView === "rma-intake" && (
-          <RMAIntakeScreen
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "rma-manager" && (
-          <RMAManagerConsole
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "rma-finance" && (
-          <RMAFinanceView
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "vendor-portal-rma" && (
-          <VendorPortalRMA
-            userRole={currentRole}
-            vendorId={vendorId}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {/* V17.2.0 Quote Generator & Benchmarks Import */}
-        {currentView === "quote-generator" && (
-          <QuoteGenerator
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {currentView === "benchmarks-import" && (
-          <BenchmarksImport
-            userRole={currentRole}
-            onBack={handleBackToDashboard}
-          />
-        )}
-
-        {selectedInvoice && (
-          <InvoiceDetail
-            invoice={selectedInvoice}
-            userRole={currentRole}
-            onBack={handleBackToList}
-          />
-        )}
-
-        {/* Footer */}
-        <footer className="text-center text-sm text-muted-foreground pt-6 border-t">
-          C3PL V17.1.2-p3f - Build Clean: Removed stray test files & excluded tests from compilation
-        </footer>
+    <div className="min-h-screen flex bg-background">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-card p-4 space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold">C3PL</h2>
+          <p className="text-sm text-muted-foreground">Returns & Finance Operations</p>
         </div>
-      </div>
-    </ErrorBoundary>
+        
+        <div className="space-y-1">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Navigation</div>
+          <nav className="space-y-1">
+            {roleAllowedRoutes.map(route => (
+              <a 
+                key={route.path}
+                href={route.path}
+                className={`block px-3 py-2 rounded-md text-sm transition-colors ${
+                  location.pathname === route.path
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                {route.title}
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        {/* Workflow Grouping */}
+        <div className="space-y-3">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Workflows</div>
+          {['Dashboards', 'Finance', 'RMA', 'Sales', 'Admin'].map(workflow => {
+            const workflowRoutes = roleAllowedRoutes.filter(r => r.workflow === workflow);
+            if (workflowRoutes.length === 0) return null;
+            
+            return (
+              <div key={workflow} className="space-y-1">
+                <div className="text-xs font-medium text-muted-foreground">{workflow}</div>
+                {workflowRoutes.map(route => (
+                  <a
+                    key={route.path}
+                    href={route.path}
+                    className={`block px-2 py-1 rounded text-xs transition-colors ${
+                      location.pathname === route.path
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    {route.title}
+                  </a>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col">
+        <header className="flex items-center justify-between px-6 py-4 border-b bg-card">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-semibold">C3PL</h1>
+            <Badge variant="outline" className="text-xs">V17.1.2-p4</Badge>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              Role: <span className="font-medium text-foreground">{role}</span>
+            </div>
+            <HeaderRoleSwitcher />
+          </div>
+        </header>
+        
+        <div className="flex-1 p-6">
+          {children}
+        </div>
+      </main>
+    </div>
   );
 }
 
-export default App;
+function Guarded({ element, roles }: { element: JSX.Element; roles?: Role[] }) {
+  const [role, setRole] = React.useState<Role>(getRole());
+  
+  React.useEffect(() => {
+    return subscribe(setRole);
+  }, []);
+  
+  const access = checkAccess([role], roles ?? []);
+  return access.allowed ? element : <Navigate to="/" replace />;
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary actor="app" module="app">
+      <BrowserRouter>
+        <AppShell>
+          <React.Suspense fallback={
+            <div className="flex items-center justify-center p-8">
+              <div className="text-center">
+                <div className="animate-spin h-8 w-8 border-b-2 border-primary rounded-full mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading...</p>
+              </div>
+            </div>
+          }>
+            <Routes>
+              {ROUTES.map(route => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={
+                    <Guarded 
+                      roles={route.roles} 
+                      element={React.createElement(route.component)} 
+                    />
+                  }
+                />
+              ))}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </React.Suspense>
+        </AppShell>
+      </BrowserRouter>
+    </ErrorBoundary>
+  );
+}

@@ -933,3 +933,5 @@ export function QuoteGenerator({ userRole, onBack }: QuoteGeneratorProps) {
     </div>
   );
 }
+
+export default QuoteGenerator;
