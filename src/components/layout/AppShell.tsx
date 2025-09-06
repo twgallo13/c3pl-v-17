@@ -1,9 +1,10 @@
-// V17.1.2-p4d — unified themed shell + sidebar (no external role switcher import)
+// V17.1.2-p5 — unified themed shell + sidebar (with footer crumb)
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
 import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
+import FooterCrumb from '@/components/layout/FooterCrumb';
 
 type Group = { name: string; items: { path: string; title: string; roles?: Role[] }[] };
 
@@ -64,6 +65,7 @@ export function AppShell({ version, children }:{ version: string; children: Reac
           </div>
         </header>
         <div className="p-4 max-w-6xl mx-auto">{children}</div>
+        <div className="p-4 max-w-6xl mx-auto"><FooterCrumb /></div>
       </main>
     </div>
   );
