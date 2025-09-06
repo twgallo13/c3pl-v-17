@@ -10,6 +10,10 @@ import { setActiveVersion } from '@/lib/version';
 const VERSION = 'V17.1.2-p8c';
 setActiveVersion(VERSION);
 
+// lazy pages
+const ProductsView = React.lazy(() => import('@/components/products-view'));
+const ProductDetail = React.lazy(() => import('@/components/product-detail'));
+
 function landingFor(role: Role): string {
   switch (role) {
     case 'Admin':          return '/dashboards';
