@@ -1,6 +1,7 @@
 /**
- * C3PL V17.1.3 Finance Dashboard
+ * C3PL V17.1.2 Finance Dashboard - Hardened
  * AR Aging, Open Invoices, Recent GL Posts with filtering
+ * V17.1.2 Patch: Safe guards, error boundary, null-safe maps/formatting
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,9 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, DollarSign, Clock, Receipt, TrendingUp, Filter, Calendar } from '@phosphor-icons/react';
 import { useKV } from '@github/spark/hooks';
 import { logEvent, stamp } from '@/lib/build-log';
-import type { UserRole, Invoice } from '@/lib/types';
+import { withErrorBoundary } from '@/components/error-boundary';
+import { safeArr, safeNum, fmtCurrency, safeStr } from '@/lib/safe';
+import { coerceInvoiceLite, type InvoiceLite } from '@/lib/schemas/finance';
+import type { UserRole } from '@/lib/types';
 
-const tag = stamp('V17.1.4', 'finance-dashboard');
+const tag = stamp('V17.1.2', 'finance-dashboard');
 
 interface FinanceDashboardProps {
   userRole: UserRole;
@@ -43,10 +47,10 @@ interface DashboardFilters {
   dateTo?: string;
 }
 
-export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
+function FinanceDashboardImpl({ userRole, onBack }: FinanceDashboardProps) {
   const [filters, setFilters] = useKV<DashboardFilters>('finance-dashboard-filters', {});
   const [arAging, setArAging] = useState<ARAgingData[]>([]);
-  const [openInvoices, setOpenInvoices] = useState<Invoice[]>([]);
+  const [openInvoices, setOpenInvoices] = useState<InvoiceLite[]>([]);
   const [recentGLPosts, setRecentGLPosts] = useState<GLPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,6 +61,8 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
+      tag('finance_dashboard_load_start');
+      
       // Mock data - in real app, would fetch from APIs
       const mockARData: ARAgingData[] = [
         { range: '0-30 days', count: 15, amount: 45300.50 },
@@ -65,46 +71,20 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
         { range: '>90 days', count: 2, amount: 12800.00 }
       ];
 
-      const mockOpenInvoices: Invoice[] = [
+      const mockOpenInvoicesRaw: any[] = [
         {
           id: 'INV-001',
-          invoiceNumber: 'INV-001',
-          clientId: 'client-001',
-          client: { id: 'client-001', name: 'Acme Corp', email: 'billing@acme.com' },
+          client: 'Acme Corp',
           status: 'issued',
-          issuedDate: '2024-01-15',
-          dueDate: '2024-02-15',
-          subtotal: 1000,
-          discountAmount: 50,
-          afterDiscounts: 950,
-          taxAmount: 76,
-          grandTotal: 1026,
-          lineItems: [],
-          notes: { vendorVisible: [], internal: [] },
-          exports: {},
-          createdAt: '2024-01-15T10:00:00Z',
-          createdBy: 'system',
-          glJournalId: 'GL-001'
+          balance: 1026,
+          gl_journal_id: 'GL-001'
         },
         {
           id: 'INV-002',
-          invoiceNumber: 'INV-002',
-          clientId: 'client-002',
-          client: { id: 'client-002', name: 'Beta LLC', email: 'ap@beta.com' },
+          client: 'Beta LLC',
           status: 'issued',
-          issuedDate: '2024-01-10',
-          dueDate: '2024-02-10',
-          subtotal: 2500,
-          discountAmount: 100,
-          afterDiscounts: 2400,
-          taxAmount: 192,
-          grandTotal: 2592,
-          lineItems: [],
-          notes: { vendorVisible: [], internal: [] },
-          exports: {},
-          createdAt: '2024-01-10T10:00:00Z',
-          createdBy: 'finance',
-          glJournalId: 'GL-002'
+          balance: 2592,
+          gl_journal_id: 'GL-002'
         }
       ];
 
@@ -135,21 +115,26 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
         }
       ];
 
-      setArAging(mockARData);
-      setOpenInvoices(mockOpenInvoices);
-      setRecentGLPosts(mockGLPosts);
+      // Safe data coercion
+      const safeOpenInvoices = safeArr(mockOpenInvoicesRaw).map(coerceInvoiceLite);
 
-      tag('dashboard_loaded', {
+      setArAging(safeArr(mockARData));
+      setOpenInvoices(safeOpenInvoices);
+      setRecentGLPosts(safeArr(mockGLPosts));
+
+      tag('finance_dashboard_load_success', {
         arAgingRanges: mockARData.length,
-        openInvoicesCount: mockOpenInvoices.length,
+        openInvoicesCount: safeOpenInvoices.length,
         recentGLPostsCount: mockGLPosts.length,
         filters
       });
 
     } catch (error) {
-      tag('dashboard_load_failed', {
-        error: error instanceof Error ? error.message : String(error),
-        filters
+      logEvent({ 
+        version: 'V17.1.2', 
+        module: 'finance-dashboard', 
+        action: 'finance_dashboard_load_error', 
+        details: { message: String(error) }
       });
     } finally {
       setIsLoading(false);
@@ -167,9 +152,9 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
     setFilters({});
   };
 
-  const calculateTotalAR = () => arAging.reduce((sum, range) => sum + range.amount, 0);
-  const getTotalOpenInvoices = () => openInvoices.reduce((sum, inv) => sum + inv.grandTotal, 0);
-  const getRecentGLTotal = () => recentGLPosts.reduce((sum, post) => sum + post.amount, 0);
+  const calculateTotalAR = () => safeArr(arAging).reduce((sum, range) => sum + safeNum(range?.amount, 0), 0);
+  const getTotalOpenInvoices = () => safeArr(openInvoices).reduce((sum, inv) => sum + safeNum(inv?.balance, 0), 0);
+  const getRecentGLTotal = () => safeArr(recentGLPosts).reduce((sum, post) => sum + safeNum(post?.amount, 0), 0);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -181,8 +166,6 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
     }
   };
 
-  const formatCurrency = (amount: number) => `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -192,7 +175,7 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Dashboard
             </Button>
-            <h1 className="text-2xl font-bold">Finance Dashboard - V17.1.3</h1>
+            <h1 className="text-2xl font-bold">Finance Dashboard - V17.1.2</h1>
           </div>
           <div className="text-center py-12">
             <div className="text-muted-foreground">Loading dashboard data...</div>
@@ -213,7 +196,7 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Finance Dashboard</h1>
-            <p className="text-muted-foreground">V17.1.3 - AR Aging, Open Invoices, GL Activity</p>
+            <p className="text-muted-foreground">V17.1.2 - AR Aging, Open Invoices, GL Activity</p>
           </div>
         </div>
 
@@ -282,7 +265,7 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total AR</p>
-                  <p className="text-2xl font-bold">{formatCurrency(calculateTotalAR())}</p>
+                  <p className="text-2xl font-bold">{fmtCurrency(calculateTotalAR())}</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -294,8 +277,8 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Open Invoices</p>
-                  <p className="text-2xl font-bold">{formatCurrency(getTotalOpenInvoices())}</p>
-                  <p className="text-xs text-muted-foreground">{openInvoices.length} invoices</p>
+                  <p className="text-2xl font-bold">{fmtCurrency(getTotalOpenInvoices())}</p>
+                  <p className="text-xs text-muted-foreground">{safeArr(openInvoices).length} invoices</p>
                 </div>
                 <Receipt className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -307,8 +290,8 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Recent GL Activity</p>
-                  <p className="text-2xl font-bold">{formatCurrency(getRecentGLTotal())}</p>
-                  <p className="text-xs text-muted-foreground">{recentGLPosts.length} entries</p>
+                  <p className="text-2xl font-bold">{fmtCurrency(getRecentGLTotal())}</p>
+                  <p className="text-xs text-muted-foreground">{safeArr(recentGLPosts).length} entries</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -321,10 +304,10 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Overdue Amount</p>
                   <p className="text-2xl font-bold text-destructive">
-                    {formatCurrency(arAging.find(r => r.range === '>90 days')?.amount || 0)}
+                    {fmtCurrency(safeArr(arAging).find(r => r.range === '>90 days')?.amount || 0)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {arAging.find(r => r.range === '>90 days')?.count || 0} invoices
+                    {safeArr(arAging).find(r => r.range === '>90 days')?.count || 0} invoices
                   </p>
                 </div>
                 <Clock className="h-8 w-8 text-destructive" />
@@ -343,7 +326,7 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {arAging.map((range) => (
+              {safeArr(arAging).map((range) => (
                 <Button
                   key={range.range}
                   variant="ghost"
@@ -358,16 +341,16 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
                   }}
                 >
                   <div className="text-left">
-                    <p className="font-medium">{range.range}</p>
-                    <p className="text-sm text-muted-foreground">{range.count} invoices</p>
+                    <p className="font-medium">{safeStr(range.range)}</p>
+                    <p className="text-sm text-muted-foreground">{safeNum(range.count)} invoices</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-lg">{formatCurrency(range.amount)}</p>
+                    <p className="font-bold text-lg">{fmtCurrency(range.amount)}</p>
                     <div className="w-32 bg-secondary rounded-full h-2 mt-1">
                       <div 
                         className="bg-primary h-2 rounded-full transition-all duration-300"
                         style={{
-                          width: `${Math.min(100, (range.amount / calculateTotalAR()) * 100)}%`
+                          width: `${Math.min(100, (safeNum(range.amount) / calculateTotalAR()) * 100)}%`
                         }}
                       />
                     </div>
@@ -379,7 +362,7 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
             <div className="mt-6 pt-4 border-t">
               <div className="flex justify-between items-center">
                 <span className="font-medium">Total Outstanding</span>
-                <span className="font-bold text-xl">{formatCurrency(calculateTotalAR())}</span>
+                <span className="font-bold text-xl">{fmtCurrency(calculateTotalAR())}</span>
               </div>
             </div>
           </CardContent>
@@ -393,20 +376,20 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {openInvoices.map((invoice) => (
+                {safeArr(openInvoices).map((invoice) => (
                   <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <p className="font-medium">{invoice.invoiceNumber}</p>
-                      <p className="text-sm text-muted-foreground">{invoice.client.name}</p>
-                      <p className="text-xs text-muted-foreground">Due: {invoice.dueDate}</p>
-                      {invoice.glJournalId && (
-                        <p className="text-xs text-muted-foreground">GL: {invoice.glJournalId}</p>
+                      <p className="font-medium">{safeStr(invoice.id)}</p>
+                      <p className="text-sm text-muted-foreground">{safeStr(invoice.client)}</p>
+                      <p className="text-xs text-muted-foreground">Status: {safeStr(invoice.status)}</p>
+                      {invoice.gl_journal_id && (
+                        <p className="text-xs text-muted-foreground">GL: {safeStr(invoice.gl_journal_id)}</p>
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">{formatCurrency(invoice.grandTotal)}</p>
-                      <Badge variant={getStatusBadgeVariant(invoice.status)}>
-                        {invoice.status}
+                      <p className="font-bold">{fmtCurrency(invoice.balance)}</p>
+                      <Badge variant={getStatusBadgeVariant(safeStr(invoice.status))}>
+                        {safeStr(invoice.status)}
                       </Badge>
                     </div>
                   </div>
@@ -422,16 +405,16 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentGLPosts.map((post) => (
+                {safeArr(recentGLPosts).map((post) => (
                   <div key={post.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <p className="font-medium">{post.description}</p>
-                      <p className="text-sm text-muted-foreground">{post.module}</p>
-                      <p className="text-xs text-muted-foreground">{post.date}</p>
-                      <p className="text-xs text-muted-foreground">Journal: {post.journalId}</p>
+                      <p className="font-medium">{safeStr(post.description)}</p>
+                      <p className="text-sm text-muted-foreground">{safeStr(post.module)}</p>
+                      <p className="text-xs text-muted-foreground">{safeStr(post.date)}</p>
+                      <p className="text-xs text-muted-foreground">Journal: {safeStr(post.journalId)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">{formatCurrency(post.amount)}</p>
+                      <p className="font-bold">{fmtCurrency(post.amount)}</p>
                     </div>
                   </div>
                 ))}
@@ -443,3 +426,10 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
     </div>
   );
 }
+
+export const FinanceDashboard = withErrorBoundary(FinanceDashboardImpl, { 
+  module: 'finance', 
+  component: 'finance-dashboard' 
+});
+
+export default FinanceDashboard;
