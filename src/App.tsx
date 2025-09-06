@@ -1,4 +1,4 @@
-// V17.1.2-p4e — router uses registry; '/' redirects to '/finance'
+// V17.1.2-p4g — router uses registry; '/' redirects to '/dashboards'
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/registry';
@@ -7,14 +7,14 @@ import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p4f';
+const VERSION = 'V17.1.2-p4g';
 setActiveVersion(VERSION);
 
 function Guarded({ element, roles }: { element: JSX.Element; roles?: Role[] }) {
   const [role, setRole] = React.useState<Role>(getRole());
   React.useEffect(() => subscribe(setRole), []);
   const access = checkAccess([role], roles ?? []);
-  return access.allowed ? element : <Navigate to="/finance" replace />;
+  return access.allowed ? element : <Navigate to="/dashboards" replace />;
 }
 
 export default function App() {
@@ -23,8 +23,7 @@ export default function App() {
       <AppShell version={VERSION}>
         <React.Suspense fallback={<div className="p-4">Loading…</div>}>
           <Routes>
-            {/* Default to Finance (single visible route) */}
-            <Route path="/" element={<Navigate to="/finance" replace />} />
+            <Route path="/" element={<Navigate to="/dashboards" replace />} />
             {ROUTES.map(r => (
               <Route
                 key={r.path}
