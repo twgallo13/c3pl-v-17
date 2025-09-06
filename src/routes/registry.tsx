@@ -1,4 +1,4 @@
-// V17.1.2-p6b — route registry (adds CS & Vendor dashboards; whitelist only)
+// V17.1.2-p7a — route registry (adds /dashboards/finance alias)
 import React from 'react';
 import type { Role } from '@/lib/role-store';
 import type { VersionTag } from '@/lib/version';
@@ -24,15 +24,19 @@ const TransitionChecklist  = React.lazy(() => import('@/components/transition-ch
 const AdminSitemap         = React.lazy(() => import('@/components/admin/sitemap'));
 
 export const ROUTES: RouteDef[] = [
-  { path: '/dashboards',        title: 'Dashboards',          workflow: 'Dashboards',             visible: true,  component: DashboardsHome },
-  { path: '/dashboards/ops',    title: 'Ops Dashboard',       workflow: 'Dashboards',             visible: true,  component: OpsDashboard },
-  { path: '/dashboards/rma',    title: 'RMA Dashboard',       workflow: 'Dashboards',             visible: true,  component: RmaDashboard },
-  { path: '/dashboards/cs',     title: 'CS Dashboard',        workflow: 'Dashboards',             visible: true,  component: CSDashboard },
-  { path: '/dashboards/vendor', title: 'Vendor Dashboard',    workflow: 'Dashboards',             visible: true,  component: VendorDashboard },
+  // Dashboards
+  { path: '/dashboards',           title: 'Dashboards',        workflow: 'Dashboards', visible: true,  component: DashboardsHome },
+  { path: '/dashboards/ops',       title: 'Ops Dashboard',     workflow: 'Dashboards', visible: true,  component: OpsDashboard },
+  { path: '/dashboards/rma',       title: 'RMA Dashboard',     workflow: 'Dashboards', visible: true,  component: RmaDashboard },
+  { path: '/dashboards/cs',        title: 'CS Dashboard',      workflow: 'Dashboards', visible: true,  component: CSDashboard },
+  { path: '/dashboards/vendor',    title: 'Vendor Dashboard',  workflow: 'Dashboards', visible: true,  component: VendorDashboard },
+  { path: '/dashboards/finance',   title: 'Finance Dashboard', workflow: 'Dashboards', roles: ['Finance','Admin'], visible: true, component: FinanceDashboard },
 
-  { path: '/finance',           title: 'Finance Dashboard',   workflow: 'Finance', roles: ['Finance','Admin'],    visible: true,  component: FinanceDashboard },
-  { path: '/rma/adjustments',   title: 'RMA Adjustments',     workflow: 'RMA',     roles: ['Operations','Admin'], visible: true,  component: RmaAdjustments },
+  // Consoles / Workflows
+  { path: '/finance',              title: 'Finance Dashboard', workflow: 'Finance',   roles: ['Finance','Admin'], visible: false, component: FinanceDashboard },
+  { path: '/rma/adjustments',      title: 'RMA Adjustments',   workflow: 'RMA',       roles: ['Operations','Admin'], visible: true, component: RmaAdjustments },
 
-  { path: '/admin/sitemap',     title: 'Sitemap',             workflow: 'Admin',   roles: ['Admin'],             visible: true,  component: AdminSitemap },
-  { path: '/admin/transition',  title: 'Transition Checklist',workflow: 'Admin',   roles: ['Admin'],             visible: false, component: TransitionChecklist },
+  // Admin
+  { path: '/admin/sitemap',        title: 'Sitemap',           workflow: 'Admin',     roles: ['Admin'], visible: true,  component: AdminSitemap },
+  { path: '/admin/transition',     title: 'Transition Checklist', workflow: 'Admin',  roles: ['Admin'], visible: false, component: TransitionChecklist },
 ];
