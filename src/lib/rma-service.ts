@@ -1,5 +1,5 @@
 /**
- * C3PL V17.1.2 RMA Service
+ * C3PL V17.1.3 RMA Service
  * End-to-end Returns Management with Firestore contracts and GL audit links
  */
 
@@ -15,11 +15,12 @@ import {
   DispositionSimulationResult,
   UserRole 
 } from "./types";
-import { logEvent, logRMAEvent, stamp } from "./build-log";
+import { logEvent, stamp } from "./build-log";
+import { logRMAEventLegacy } from "./rma-logger";
 import { rbacService } from "./rbac";
 
 // Pre-stamp version + module for consistent RMA logs
-const tagRMA = stamp('V17.1.2', 'rma');
+const tagRMA = stamp('V17.1.3', 'rma');
 
 export class RMAService {
   private static instance: RMAService;
@@ -505,7 +506,7 @@ export class RMAService {
     };
 
     this.rmaEvents.push(event);
-    logRMAEvent(rmaId, action, actor, details);
+    logRMAEventLegacy(rmaId, action, actor, details);
   }
 
   // Simulate disposition for testing

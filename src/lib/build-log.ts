@@ -430,6 +430,12 @@ export const BUILD_LOG_V17_1_3 = {
       description: "Enhanced RBAC for finance operations with version V17.1.3 gates",
       files: ["src/lib/rbac.ts"],
       status: "completed"
+    },
+    {
+      module: "rma-logger-adapter-fix",
+      description: "Fixed logRMAEvent import error by creating RMA logging adapter",
+      files: ["src/lib/rma-logger.ts", "src/lib/rma-service.ts", "src/lib/build-log.d.ts"],
+      status: "completed"
     }
   ],
   readinessChecklist: {
@@ -442,6 +448,7 @@ export const BUILD_LOG_V17_1_3 = {
     rmaAdjustmentsViewComplete: true,
     paymentsFlowImplemented: true,
     debuggerToolsUpdated: true,
+    rmaLoggerAdapterFixed: true,
     buildLogUpdated: true,
     allChangesUnderV17_1_3: true
   }
@@ -477,6 +484,19 @@ console.log("📋 RMA Adjustments: Enhanced view with artifact types and GL jour
 const tagFinance = stamp('V17.1.3', 'finance');
 tagFinance('system_initialized', { 
   features: ['gl_posting', 'export_parity', 'finance_dashboard', 'advanced_math', 'payments_flow'] 
+});
+
+logEvent({ 
+  version: 'V17.1.3', 
+  module: 'build-log', 
+  action: 'rma_logger_adapter_fix_complete',
+  details: { 
+    issue_resolved: 'logRMAEvent import error eliminated',
+    adapter_created: 'src/lib/rma-logger.ts',
+    imports_standardized: true,
+    runtime_errors_fixed: true
+  },
+  actor: 'system'
 });
 
 logEvent({ 

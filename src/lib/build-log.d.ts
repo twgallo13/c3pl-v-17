@@ -22,12 +22,7 @@ export declare function logEventLegacy(
 ): void;
 export declare function stamp(version: string, module: string): (action: string, details?: unknown, actor?: string) => void;
 export declare function versionGate(requiredVersion: string): boolean;
-export declare function logRMAEvent(
-  rmaId: string,
-  action: string,
-  actor: string,
-  metadata?: Record<string, any>
-): void;
+
 export declare function logWMSEvent(
   level: "info" | "warn" | "error" | "debug",
   module: string,
