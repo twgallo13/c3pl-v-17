@@ -1,27 +1,27 @@
 // V17.1.2-p7e-fix2 — RMA Adjustments data adapter (flagged, null-safe)
-import { safeArr, safeNum, safeStr } from '@/lib/safe';
 
-export type RmaAdjustment = {
-  id: string;
-  artifact_type?: string;
+
   amount?: number;
-  gl_journal_id?: string | null;
-  posted_at?: string | null;
-};
+  posted_at?:
 
-export async function fetchRmaAdjustments(): Promise<RmaAdjustment[]> {
-  const useApi = (import.meta as any).env?.VITE_RMA_API === '1';
-  if (!useApi) return [];
+  const useApi = (
 
-  try {
-    const res = await fetch('/api/rma/adjustments', { method: 'GET' });
-    if (!res.ok) {
-      console.warn('V17.1.2-p7e-fix2 rma adapter: non-OK', res.status);
-      return [];
-    }
-    const json: any = await res.json().catch(() => ({}));
-    const rows = safeArr(json?.items ?? json); // support {items: []} or []
-    return rows.map((r: any) => ({
+    const res = await fetch(
+  
+
+    const rows = safeArr(json?.items ?? json); // support {items: []} o
+      id: safeStr(r?.id),
+      amount: safeNum(r?.
+
+  } cat
+    return [];
+}
+
+
+
+
+
+
       id: safeStr(r?.id),
       artifact_type: safeStr(r?.artifact_type ?? r?.type ?? ''),
       amount: safeNum(r?.amount, 0),
