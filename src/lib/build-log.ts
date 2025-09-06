@@ -285,6 +285,12 @@ export const BUILD_LOG_V17_1_2_PATCH = {
       status: "completed"
     },
     {
+      module: "rbac-service-export",
+      description: "Added missing rbacService named export with full API (checkAccess, serverGuard, canAccessRoute, getAvailableFeatures)",
+      files: ["src/lib/rbac.ts"],
+      status: "completed"
+    },
+    {
       module: "agent-lockout",
       description: "Implemented Stu/17.2 lockout while V17.1.2 is active",
       files: ["src/lib/agent-guard.ts", "src/App.tsx"],
@@ -311,6 +317,7 @@ export const BUILD_LOG_V17_1_2_PATCH = {
     versionGateOperational: true,
     stuLockoutActive: true,
     crashGuardImplemented: true,
+    rbacServiceExportFixed: true,
     buildLogUpdated: true
   }
 } as const;
@@ -660,13 +667,31 @@ tagPatch('system_initialized', {
 logEvent({ 
   version: 'V17.1.2', 
   module: 'build-log', 
+  action: 'rbac_service_export_fix_complete',
+  details: { 
+    issue_resolved: 'rbacService named export missing from rbac.ts',
+    export_added: 'rbacService with full API surface',
+    access_checks_operational: true,
+    server_guard_functional: true,
+    route_access_working: true,
+    feature_enumeration_active: true,
+    logging_standardized: true,
+    typescript_clean: true
+  },
+  actor: 'system'
+});
+
+logEvent({ 
+  version: 'V17.1.2', 
+  module: 'build-log', 
   action: 'patch_complete',
   details: { 
     error_boundary_stable: true,
     role_normalization_fixed: true,
     version_gate_operational: true,
     stu_lockout_active: true,
-    access_denied_eliminated: true
+    access_denied_eliminated: true,
+    rbac_service_export_fixed: true
   },
   actor: 'system'
 });
