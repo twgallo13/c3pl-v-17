@@ -6,16 +6,20 @@ import { DebuggerPanel } from "@/components/debugger-panel";
 import { TransitionReadinessChecklist } from "@/components/transition-checklist";
 import { InvoiceList } from "@/components/invoice-list";
 import { InvoiceDetail } from "@/components/invoice-detail";
+import { ReceivingScreen } from "@/components/receiving-screen";
+import { WaveControlDashboard } from "@/components/wave-control-dashboard";
+import { PickingApp } from "@/components/picking-app";
+import { PackoutStation } from "@/components/packout-station";
 import { useKV } from "@github/spark/hooks";
 import { UserRole, Invoice } from "@/lib/types";
 import { useState } from "react";
-import { Receipt, ArrowLeft } from "@phosphor-icons/react";
+import { Receipt, ArrowLeft, Package, Waves, Scan, Truck } from "@phosphor-icons/react";
 import "@/lib/build-log";
 
 function App() {
   const [currentRole] = useKV<UserRole>("c3pl-current-role", "Admin");
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "invoices">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "receiving" | "wave-control" | "picking" | "packout">("dashboard");
   
   const handleSelectInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -39,7 +43,7 @@ function App() {
         {/* Header */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {currentView === "invoices" && (
+            {(currentView === "invoices" || currentView === "receiving" || currentView === "wave-control" || currentView === "picking" || currentView === "packout") && (
               <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Dashboard
@@ -84,7 +88,7 @@ function App() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.0</span>
+                      <span className="ml-2 font-mono">V17.1.1</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Environment:</span>
@@ -101,14 +105,52 @@ function App() {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={() => setCurrentView("invoices")}
-                  className="w-full"
-                  variant="outline"
-                >
-                  <Receipt className="h-4 w-4 mr-2" />
-                  View Invoices
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={() => setCurrentView("invoices")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Receipt className="h-4 w-4 mr-2" />
+                    Financial Management
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("receiving")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Receiving Station
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("wave-control")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Waves className="h-4 w-4 mr-2" />
+                    Wave Control
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("picking")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Scan className="h-4 w-4 mr-2" />
+                    Picking App
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("packout")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Truck className="h-4 w-4 mr-2" />
+                    Packout Station
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
@@ -129,6 +171,35 @@ function App() {
           />
         )}
 
+        {/* WMS Views */}
+        {currentView === "receiving" && (
+          <ReceivingScreen
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
+        {currentView === "wave-control" && (
+          <WaveControlDashboard
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
+        {currentView === "picking" && (
+          <PickingApp
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
+        {currentView === "packout" && (
+          <PackoutStation
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
         {selectedInvoice && (
           <InvoiceDetail
             invoice={selectedInvoice}
@@ -139,7 +210,7 @@ function App() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground pt-6 border-t">
-          C3PL V17.1.0 - Enhanced with Invoice System, Schema Validation, and Export Parity Tools
+          C3PL V17.1.1 - Enhanced with WMS Core Workflows, Audit Explorer, and Wave Simulation Tools
         </footer>
       </div>
     </div>

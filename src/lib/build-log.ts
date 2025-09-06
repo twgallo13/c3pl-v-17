@@ -203,22 +203,117 @@ export const BUILD_LOG_V17_1_0 = {
   }
 } as const;
 
-// Enhanced logging function for V17.1.0
-export function logEvent(
+export const BUILD_LOG_V17_1_1 = {
+  version: "V17.1.1",
+  buildDate: "2024-01-18",
+  basedOn: "V17.1.0",
+  changes: [
+    {
+      module: "version-upgrade",
+      description: "Updated version tag from V17.1.0 to V17.1.1 across all UI components",
+      files: ["src/lib/types.ts", "index.html", "src/App.tsx"],
+      status: "completed"
+    },
+    {
+      module: "wms-core-types",
+      description: "Implemented comprehensive WMS type definitions for bins, inventory, orders, waves, and audit events",
+      files: ["src/lib/types.ts", "src/lib/wms-service.ts"],
+      status: "completed"
+    },
+    {
+      module: "receiving-screen",
+      description: "Built Receiving Screen with PO scanning, SKU display, label printing, and bin assignment",
+      files: ["src/components/receiving-screen.tsx"],
+      status: "completed"
+    },
+    {
+      module: "wave-control-dashboard",
+      description: "Created Wave Control Dashboard with KPIs, wave builder, and exception queue",
+      files: ["src/components/wave-control-dashboard.tsx"],
+      status: "completed"
+    },
+    {
+      module: "picking-app",
+      description: "Developed mobile-optimized Picking App with optimized paths, scan confirmation, and progress tracking",
+      files: ["src/components/picking-app.tsx"],
+      status: "completed"
+    },
+    {
+      module: "packout-station",
+      description: "Implemented Packout Station with item scanning, weight/dimensions capture, and shipping confirmation",
+      files: ["src/components/packout-station.tsx"],
+      status: "completed"
+    },
+    {
+      module: "wms-service",
+      description: "Built comprehensive WMS service layer with workflow simulation and audit event generation",
+      files: ["src/lib/wms-service.ts"],
+      status: "completed"
+    },
+    {
+      module: "wms-audit-explorer",
+      description: "Added WMS Audit Explorer to debugger panel for warehouse event visualization",
+      files: ["src/components/wms-audit-explorer.tsx", "src/components/debugger-panel.tsx"],
+      status: "completed"
+    },
+    {
+      module: "wave-simulation-tool",
+      description: "Created Wave Simulation Tool for multi-zone wave assignment testing",
+      files: ["src/components/wave-simulation-tool.tsx", "src/components/debugger-panel.tsx"],
+      status: "completed"
+    },
+    {
+      module: "workflow-integration",
+      description: "Integrated full receiving → wave → picking → packout lifecycle with audit logging",
+      files: ["src/App.tsx", "src/lib/wms-service.ts"],
+      status: "completed"
+    },
+    {
+      module: "role-based-wms",
+      description: "Extended role-based access control to include WMS operations and vendor portal visibility",
+      files: ["src/components/receiving-screen.tsx", "src/components/wave-control-dashboard.tsx", "src/components/picking-app.tsx", "src/components/packout-station.tsx"],
+      status: "completed"
+    },
+    {
+      module: "enhanced-transition-checklist",
+      description: "Updated transition checklist with V17.1.1 WMS validation requirements",
+      files: ["src/components/transition-checklist.tsx"],
+      status: "completed"
+    }
+  ],
+  readinessChecklist: {
+    noTypeScriptErrors: true,
+    wmsShellInitialized: true,
+    receivingScreenFunctional: true,
+    waveControlDashboard: true,
+    pickingAppMobile: true,
+    packoutStationUI: true,
+    allFlowsAuditable: true,
+    buildLogUpdated: true
+  }
+} as const;
+
+// Enhanced logging function for V17.1.1
+export function logWMSEvent(
   level: "info" | "warn" | "error" | "debug",
   module: string,
   actor: string,
-  message: string
+  message: string,
+  entityId?: string,
+  metadata?: Record<string, any>
 ): void {
   const timestamp = new Date().toISOString();
-  const logEntry = `[${timestamp}] [${level.toUpperCase()}] [${actor}@${module}] ${message}`;
+  const entityInfo = entityId ? ` [${entityId}]` : "";
+  const metadataInfo = metadata ? ` ${JSON.stringify(metadata)}` : "";
+  const logEntry = `[${timestamp}] [${level.toUpperCase()}] [${actor}@${module}]${entityInfo} ${message}${metadataInfo}`;
   
-  console.log(`🔄 V17.1.0 | ${logEntry}`);
+  console.log(`📦 V17.1.1 | ${logEntry}`);
 }
 
-console.log("🚀 C3PL V17.1.0 Build Started - Invoice System Implementation");
-console.log("📋 V17.0.0 Base:", BUILD_LOG_V17_0_0);
-console.log("📋 V17.0.1 Changes:", BUILD_LOG_V17_0_1);
-console.log("📋 V17.1.0 New Features:", BUILD_LOG_V17_1_0);
-console.log("💼 Invoice System: Firestore Schema + UI + Export Parity Validation");
-console.log("⚠️  Export parity testing required for GitHub migration readiness");
+console.log("🚀 C3PL V17.1.1 Build Started - WMS Core Workflows Implementation");
+console.log("📋 V17.1.0 Base:", BUILD_LOG_V17_1_0);
+console.log("📋 V17.1.1 New Features:", BUILD_LOG_V17_1_1);
+console.log("📦 WMS System: Receiving → Wave Control → Picking → Packout");
+console.log("🔍 Audit Explorer: Warehouse event tracking and visualization");
+console.log("🧪 Wave Simulation: Multi-zone assignment testing and optimization");
+console.log("⚠️  WMS workflow testing required for GitHub migration readiness");

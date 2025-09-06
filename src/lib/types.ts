@@ -1,4 +1,4 @@
-export const VERSION = "V17.1.0" as const;
+export const VERSION = "V17.1.1" as const;
 
 export type UserRole = "Vendor" | "Account Manager" | "Customer Service" | "Operations" | "Admin" | "Finance";
 
@@ -114,6 +114,171 @@ export interface InvoiceLifecycleEvent {
   metadata?: Record<string, any>;
 }
 
+// WMS (Warehouse Management System) Types
+export type BinStatus = "Available" | "Full" | "Reserved" | "Damaged";
+export type OrderStatus = "Pending" | "Ready" | "Picking" | "Packed" | "Shipped" | "Delivered";
+export type WaveStatus = "Draft" | "Released" | "In Progress" | "Completed" | "Cancelled";
+export type PickStatus = "Pending" | "In Progress" | "Picked" | "Not Found" | "Exception";
+
+export interface Bin {
+  id: string;
+  location: string;
+  zone: string;
+  capacity: number;
+  currentCount: number;
+  status: BinStatus;
+  assignedSKUs: string[];
+  lastUpdated: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  sku: string;
+  variant?: string;
+  description: string;
+  binId: string;
+  quantity: number;
+  trackingId?: string;
+  receivedDate: string;
+}
+
+export interface PurchaseOrderLine {
+  id: string;
+  sku: string;
+  variant?: string;
+  description: string;
+  expectedQuantity: number;
+  receivedQuantity: number;
+  unitPrice: number;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string;
+  vendorId: string;
+  vendorName: string;
+  status: "Open" | "Receiving" | "Completed" | "Cancelled";
+  lines: PurchaseOrderLine[];
+  expectedDate: string;
+  receivedDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderLine {
+  id: string;
+  sku: string;
+  variant?: string;
+  description: string;
+  quantity: number;
+  pickedQuantity: number;
+  binId?: string;
+  pickStatus: PickStatus;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  customerId: string;
+  customerName: string;
+  status: OrderStatus;
+  priority: "Low" | "Normal" | "High" | "Urgent";
+  lines: OrderLine[];
+  waveId?: string;
+  zone?: string;
+  createdAt: string;
+  dueDate: string;
+  packedAt?: string;
+  shippedAt?: string;
+  trackingNumber?: string;
+}
+
+export interface Wave {
+  id: string;
+  waveNumber: string;
+  status: WaveStatus;
+  orderIds: string[];
+  assignedZones: string[];
+  assignedPicker?: string;
+  createdAt: string;
+  releasedAt?: string;
+  completedAt?: string;
+  createdBy: string;
+}
+
+export interface PickTask {
+  id: string;
+  orderId: string;
+  orderLineId: string;
+  waveId: string;
+  sku: string;
+  variant?: string;
+  binLocation: string;
+  quantityToPick: number;
+  quantityPicked: number;
+  status: PickStatus;
+  pickerId?: string;
+  pickPath: number;
+  zone: string;
+}
+
+export interface PackoutCarton {
+  id: string;
+  cartonNumber: string;
+  orderId: string;
+  items: {
+    sku: string;
+    variant?: string;
+    quantity: number;
+    trackingId?: string;
+  }[];
+  weight: number;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  trackingNumber?: string;
+  packedAt: string;
+  packedBy: string;
+}
+
+export interface WarehouseException {
+  id: string;
+  type: "Pick Not Found" | "Over Capacity" | "Damaged Item" | "Miscount" | "Other";
+  entityId: string;
+  entityType: "Order" | "SKU" | "Bin" | "Wave";
+  description: string;
+  status: "Open" | "Investigating" | "Resolved";
+  reportedBy: string;
+  reportedAt: string;
+  resolvedBy?: string;
+  resolvedAt?: string;
+  resolution?: string;
+}
+
+export interface WMSAuditEvent {
+  id: string;
+  event: "po_scanned" | "item_received" | "wave_released" | "item_picked" | "carton_packed" | "order_shipped" | "exception_raised";
+  entityId: string;
+  entityType: "PO" | "Inventory" | "Wave" | "Order" | "Carton" | "Exception";
+  actor: string;
+  timestamp: string;
+  previousState?: any;
+  newState?: any;
+  metadata?: Record<string, any>;
+}
+
+export interface WaveKPIs {
+  openOrders: number;
+  readyToPick: number;
+  exceptionsCount: number;
+  activeWaves: number;
+  totalPickTasks: number;
+  completedPickTasks: number;
+  averagePickTime: number;
+}
+
 export interface AppState {
   isLoggedIn: boolean;
   currentUser: QAUser | null;
@@ -124,4 +289,15 @@ export interface AppState {
   lastError: ErrorReplayData | null;
   invoices: Invoice[];
   selectedInvoice: Invoice | null;
+  // WMS State
+  purchaseOrders: PurchaseOrder[];
+  inventory: InventoryItem[];
+  bins: Bin[];
+  orders: Order[];
+  waves: Wave[];
+  pickTasks: PickTask[];
+  cartons: PackoutCarton[];
+  exceptions: WarehouseException[];
+  auditEvents: WMSAuditEvent[];
+  currentView: "dashboard" | "invoices" | "receiving" | "wave-control" | "picking" | "packout";
 }

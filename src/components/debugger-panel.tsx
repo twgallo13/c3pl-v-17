@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Terminal, Settings, Check, Network, FileText, Bug, Receipt } from "@phosphor-icons/react";
+import { User, Terminal, Settings, Check, Network, FileText, Bug, Receipt, Waves } from "@phosphor-icons/react";
 import { useKV } from "@github/spark/hooks";
 import { useState } from "react";
 import { VERSION, UserRole, QAUser, LogEntry } from "@/lib/types";
@@ -16,6 +16,8 @@ import { NetworkInspector } from "./network-inspector";
 import { SchemaValidator } from "./schema-validator";
 import { ErrorReplayer } from "./error-replayer";
 import { ExportParityChecker } from "./export-parity-checker";
+import { WMSAuditExplorer } from "./wms-audit-explorer";
+import { WaveSimulationTool } from "./wave-simulation-tool";
 
 interface DebuggerPanelProps {
   className?: string;
@@ -94,7 +96,7 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs defaultValue="controls" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="controls">Controls</TabsTrigger>
             <TabsTrigger value="network">
               <Network size={16} className="mr-1" />
@@ -107,6 +109,13 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
             <TabsTrigger value="invoices">
               <Receipt size={16} className="mr-1" />
               Invoices
+            </TabsTrigger>
+            <TabsTrigger value="wms-audit">
+              <Waves size={16} className="mr-1" />
+              WMS Audit
+            </TabsTrigger>
+            <TabsTrigger value="wave-sim">
+              Wave Sim
             </TabsTrigger>
             <TabsTrigger value="errors">
               <Bug size={16} className="mr-1" />
@@ -217,6 +226,14 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
 
           <TabsContent value="invoices">
             <ExportParityChecker />
+          </TabsContent>
+
+          <TabsContent value="wms-audit">
+            <WMSAuditExplorer />
+          </TabsContent>
+
+          <TabsContent value="wave-sim">
+            <WaveSimulationTool />
           </TabsContent>
 
           <TabsContent value="errors">
