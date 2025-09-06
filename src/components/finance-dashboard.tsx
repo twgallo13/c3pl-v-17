@@ -384,15 +384,6 @@ export function FinanceDashboard({ userRole, onBack }: FinanceDashboardProps) {
             </div>
           </CardContent>
         </Card>
-                    <p className="text-sm text-muted-foreground">
-                      {((range.amount / calculateTotalAR()) * 100).toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Open Invoices */}

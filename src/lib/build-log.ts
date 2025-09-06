@@ -524,6 +524,12 @@ export const BUILD_LOG_V17_1_4 = {
       description: "Comprehensive logging for payment_recorded, payment_applied, payment_reconciled, ar_aging_generated, dunning_notice_generated",
       files: ["src/services/payments.ts", "src/lib/bank-recon.ts", "src/lib/dunning.ts"],
       status: "completed"
+    },
+    {
+      module: "finance-dashboard-jsx-fix",
+      description: "Fixed JSX syntax error in finance-dashboard.tsx line 392 - removed duplicate/orphaned JSX fragments",
+      files: ["src/components/finance-dashboard.tsx"],
+      status: "completed"
     }
   ],
   readinessChecklist: {
@@ -583,6 +589,19 @@ logEvent({
     bank_csv_import: true,
     ar_aging_enhanced: true,
     invoice_payments_panel: true
+  },
+  actor: 'system'
+});
+
+logEvent({ 
+  version: 'V17.1.4', 
+  module: 'build-log', 
+  action: 'finance_dashboard_jsx_fix_complete',
+  details: { 
+    issue_resolved: 'JSX syntax error at line 392 eliminated',
+    duplicate_jsx_removed: 'Orphaned JSX fragments cleaned up',
+    build_status: 'passing',
+    syntax_errors_eliminated: true
   },
   actor: 'system'
 });
