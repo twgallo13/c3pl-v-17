@@ -1,5 +1,5 @@
 // V17.1.2-p10a — RMA Adjustments (safe placeholder, fixed JSX)
-import React from 'react';
+
 
 export default function RmaAdjustments() {
   return (
@@ -8,6 +8,5 @@ export default function RmaAdjustments() {
       <p className="text-sm text-muted-foreground">
         Placeholder — review, apply, and post return adjustments will appear here.
       </p>
-    </div>
+
   );
-}
