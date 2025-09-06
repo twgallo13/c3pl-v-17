@@ -7,7 +7,7 @@ import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p4e';
+const VERSION = 'V17.1.2-p4f';
 setActiveVersion(VERSION);
 
 function Guarded({ element, roles }: { element: JSX.Element; roles?: Role[] }) {
