@@ -10,16 +10,21 @@ import { ReceivingScreen } from "@/components/receiving-screen";
 import { WaveControlDashboard } from "@/components/wave-control-dashboard";
 import { PickingApp } from "@/components/picking-app";
 import { PackoutStation } from "@/components/packout-station";
+import RMAIntakeScreen from "@/components/rma-intake";
+import RMAManagerConsole from "@/components/rma-manager-console";
+import RMAFinanceView from "@/components/rma-finance-view";
+import VendorPortalRMA from "@/components/vendor-portal-rma";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { useKV } from "@github/spark/hooks";
 import { UserRole, Invoice } from "@/lib/types";
 import { useState } from "react";
-import { Receipt, ArrowLeft, Package, Waves, Scan, Truck } from "@phosphor-icons/react";
+import { Receipt, ArrowLeft, Package, Waves, Scan, Truck, RotateCcw, ClipboardList, DollarSign, Eye } from "@phosphor-icons/react";
 import "@/lib/build-log";
 
 function App() {
   const [currentRole] = useKV<UserRole>("c3pl-current-role", "Admin");
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "receiving" | "wave-control" | "picking" | "packout">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma">("dashboard");
   
   const handleSelectInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -38,24 +43,25 @@ function App() {
   const vendorId = currentRole === "Vendor" ? "vendor-001" : undefined;
   
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {(currentView === "invoices" || currentView === "receiving" || currentView === "wave-control" || currentView === "picking" || currentView === "packout") && (
-              <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-            )}
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">C3PL</h1>
-              <p className="text-muted-foreground">Quality Assurance & Financial Management Tool</p>
+    <ErrorBoundary actor={`user-${currentRole}`} module="app">
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <header className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {(currentView !== "dashboard") && (
+                <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+              )}
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">C3PL</h1>
+                <p className="text-muted-foreground">Returns Management & Financial Operations Tool</p>
+              </div>
             </div>
-          </div>
-          <VersionDisplay />
-        </header>
+            <VersionDisplay />
+          </header>
 
         {/* Main Content - Conditional Views */}
         {currentView === "dashboard" && !selectedInvoice && (
@@ -88,7 +94,7 @@ function App() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.1</span>
+                      <span className="ml-2 font-mono">V17.1.2</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Environment:</span>
@@ -113,6 +119,42 @@ function App() {
                   >
                     <Receipt className="h-4 w-4 mr-2" />
                     Financial Management
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("rma-intake")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    RMA Intake
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("rma-manager")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    RMA Manager Console
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("rma-finance")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    RMA Finance View
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("vendor-portal-rma")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Vendor Portal RMA
                   </Button>
                   
                   <Button 
@@ -200,6 +242,36 @@ function App() {
           />
         )}
 
+        {/* RMA Views */}
+        {currentView === "rma-intake" && (
+          <RMAIntakeScreen
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
+        {currentView === "rma-manager" && (
+          <RMAManagerConsole
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
+        {currentView === "rma-finance" && (
+          <RMAFinanceView
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
+        {currentView === "vendor-portal-rma" && (
+          <VendorPortalRMA
+            userRole={currentRole}
+            vendorId={vendorId}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
         {selectedInvoice && (
           <InvoiceDetail
             invoice={selectedInvoice}
@@ -210,10 +282,11 @@ function App() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground pt-6 border-t">
-          C3PL V17.1.1 - Enhanced with WMS Core Workflows, Audit Explorer, and Wave Simulation Tools
+          C3PL V17.1.2 - Enhanced with RMA End-to-End, Disposition Handlers, and Audit Link Integration
         </footer>
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }
 

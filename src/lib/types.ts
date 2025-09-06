@@ -1,6 +1,6 @@
-export const VERSION = "V17.1.1" as const;
+export const VERSION = "V17.1.2" as const;
 
-export type UserRole = "Vendor" | "Account Manager" | "Customer Service" | "Operations" | "Admin" | "Finance";
+export type UserRole = "Vendor" | "Account Manager" | "Customer Service" | "Operations" | "Admin" | "Finance" | "Associate" | "Manager";
 
 export interface QAUser {
   id: string;
@@ -279,6 +279,137 @@ export interface WaveKPIs {
   averagePickTime: number;
 }
 
+// RMA (Returns Management) Types
+export type RMAStatus = "open" | "processed" | "closed";
+export type DispositionType = "RESTOCK" | "SCRAP" | "RTV" | "REPAIR";
+export type ReasonCode = "DEFECT" | "DAMAGED" | "UNWANTED" | "OTHER";
+export type RMALineStatus = "pending" | "posted" | "error";
+
+export interface RMAAccountingAdjustment {
+  type: "credit_memo" | "disposal_fee" | "rtv_charge" | "repair_invoice";
+  invoice_id?: string;
+  gl_journal_id?: string;
+  amount: number;
+  posted_at?: string;
+}
+
+export interface RMALine {
+  line_id: string;
+  sku: string;
+  variant?: string;
+  description: string;
+  qty: number;
+  reason_code: ReasonCode;
+  disposition?: DispositionType;
+  pricing: {
+    unit_price: number;
+  };
+  costing: {
+    unit_cost: number;
+  };
+  accounting_adjustments: RMAAccountingAdjustment[];
+  status: RMALineStatus;
+  messages: string[];
+  disposition_notes?: string;
+  processed_at?: string;
+  processed_by?: string;
+}
+
+export interface RMA {
+  rma_id: string;
+  meta: {
+    created_at: string;
+    created_by: string;
+    status: RMAStatus;
+    updated_at: string;
+    updated_by: string;
+  };
+  client: {
+    account_id: string;
+    name: string;
+  };
+  references: {
+    original_invoice_id: string;
+  };
+  lines: RMALine[];
+  return_label_printed?: boolean;
+  manager_notes?: string;
+  total_credit_amount?: number;
+  total_disposal_fees?: number;
+}
+
+export interface RMAEvent {
+  id: string;
+  rma_id: string;
+  action: "rma_created" | "rma_processed" | "credit_memo_issued" | "gl_posted" | "disposition_assigned" | "return_label_printed";
+  actor: string;
+  timestamp: string;
+  line_id?: string;
+  details?: Record<string, any>;
+}
+
+export interface GLJournalEntry {
+  id: string;
+  journal_date: string;
+  description: string;
+  reference_type: "rma" | "invoice" | "credit_memo";
+  reference_id: string;
+  entries: {
+    account_code: string;
+    account_name: string;
+    debit?: number;
+    credit?: number;
+  }[];
+  posted_by: string;
+  posted_at: string;
+}
+
+export interface CreditMemo {
+  id: string;
+  credit_memo_number: string;
+  client_id: string;
+  client_name: string;
+  original_invoice_id: string;
+  rma_id: string;
+  line_items: {
+    id: string;
+    description: string;
+    quantity: number;
+    unit_price: number;
+    amount: number;
+  }[];
+  totals: {
+    subtotal: number;
+    taxes: number;
+    total: number;
+  };
+  issued_date: string;
+  created_by: string;
+  gl_journal_id?: string;
+}
+
+export interface DispositionSimulationResult {
+  disposition: DispositionType;
+  line: RMALine;
+  generated_artifacts: {
+    credit_memo?: CreditMemo;
+    disposal_invoice?: Invoice;
+    rtv_invoice?: Invoice;
+    repair_invoice?: Invoice;
+    gl_journal?: GLJournalEntry;
+  };
+  inventory_impact: {
+    quantity_change: number;
+    value_change: number;
+  };
+  ar_impact: {
+    amount: number;
+    account: string;
+  };
+  status: "success" | "error";
+  messages: string[];
+}
+
 export interface AppState {
   isLoggedIn: boolean;
   currentUser: QAUser | null;
@@ -299,5 +430,11 @@ export interface AppState {
   cartons: PackoutCarton[];
   exceptions: WarehouseException[];
   auditEvents: WMSAuditEvent[];
-  currentView: "dashboard" | "invoices" | "receiving" | "wave-control" | "picking" | "packout";
+  // RMA State
+  rmas: RMA[];
+  selectedRMA: RMA | null;
+  rmaEvents: RMAEvent[];
+  creditMemos: CreditMemo[];
+  glJournals: GLJournalEntry[];
+  currentView: "dashboard" | "invoices" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma";
 }

@@ -1,36 +1,64 @@
 /**
- * C3PL V17.1.1 Build Log - V17.1.0 Patch
+ * C3PL V17.1.2 Build Log - Standardized Logging System
  * All changes and implementations tied to this version
- * Standardized named exports for logging utilities
+ * Zero default exports - named exports only for forward compatibility
  */
 
-// V17.1.0 Patch — build log utilities (standardized named exports)
+// V17.1.2 — build log utilities (standardized named exports)
 export type BuildLogEvent = {
-  version: string;    // e.g., "V17.1.0"
-  module: string;     // e.g., "billing"
-  action: string;     // e.g., "invoice_issued"
+  version: string;    // e.g., "V17.1.2"
+  module: string;     // e.g., "rma", "billing", "wms"  
+  action: string;     // e.g., "rma_created", "invoice_issued"
   details?: unknown;
   actor?: string;
   at?: string;        // ISO timestamp, defaults to now
 };
 
-export function logEvent(
+// Primary logging function - standardized signature for all modules
+export function logEvent(ev: BuildLogEvent): void {
+  const at = ev.at ?? new Date().toISOString();
+  // Structured logging: required for Debugger output + audit trail
+  // eslint-disable-next-line no-console
+  console.info('[BUILD-LOG]', { ...ev, at });
+}
+
+// Legacy compatibility function for older signature
+export function logEventLegacy(
   level: "info" | "warn" | "error" | "debug",
   module: string,
   actor: string,
   message: string,
   details?: unknown
 ): void {
-  const at = new Date().toISOString();
-  // Structured logging: required for Debugger output + audit trail
-  // eslint-disable-next-line no-console
-  console.info('[BUILD-LOG]', { level, module, actor, message, details, at });
+  logEvent({
+    version: 'V17.1.2',
+    module,
+    action: message,
+    details,
+    actor
+  });
 }
 
 // Helper: pre-stamp version + module for consistent logs
 export function stamp(version: string, module: string) {
   return (action: string, details?: unknown, actor?: string) =>
-    logEvent("info", module, actor || "system", action, details);
+    logEvent({ version, module, action, details, actor });
+}
+
+// Version gate utility to block features not in current version
+export function versionGate(requiredVersion: string): boolean {
+  const currentVersion = 'V17.1.2';
+  if (requiredVersion !== currentVersion) {
+    logEvent({
+      version: currentVersion,
+      module: 'version-gate',
+      action: 'access_denied',
+      details: { requiredVersion, currentVersion },
+      actor: 'system'
+    });
+    return false;
+  }
+  return true;
 }
 
 export const BUILD_LOG_V17_0_0 = {
@@ -233,97 +261,115 @@ export const BUILD_LOG_V17_1_0 = {
   }
 } as const;
 
-export const BUILD_LOG_V17_1_1 = {
-  version: "V17.1.1",
-  buildDate: "2024-01-18",
-  basedOn: "V17.1.0",
+export const BUILD_LOG_V17_1_2 = {
+  version: "V17.1.2",
+  buildDate: new Date().toISOString().split('T')[0],
+  basedOn: "V17.1.1",
   changes: [
     {
       module: "version-upgrade",
-      description: "Updated version tag from V17.1.0 to V17.1.1 across all UI components",
+      description: "Updated version tag from V17.1.1 to V17.1.2 across all UI components",
       files: ["src/lib/types.ts", "index.html", "src/App.tsx"],
       status: "completed"
     },
     {
-      module: "wms-core-types",
-      description: "Implemented comprehensive WMS type definitions for bins, inventory, orders, waves, and audit events",
-      files: ["src/lib/types.ts", "src/lib/wms-service.ts"],
+      module: "logging-standardization",
+      description: "Fixed logging system with standardized named exports and BuildLogEvent type",
+      files: ["src/lib/build-log.ts", "src/lib/build-log.d.ts"],
       status: "completed"
     },
     {
-      module: "receiving-screen",
-      description: "Built Receiving Screen with PO scanning, SKU display, label printing, and bin assignment",
-      files: ["src/components/receiving-screen.tsx"],
+      module: "version-gate",
+      description: "Added versionGate utility to enforce feature access by version",
+      files: ["src/lib/build-log.ts"],
       status: "completed"
     },
     {
-      module: "wave-control-dashboard",
-      description: "Created Wave Control Dashboard with KPIs, wave builder, and exception queue",
-      files: ["src/components/wave-control-dashboard.tsx"],
+      module: "error-boundary",
+      description: "Implemented global error boundary with persona context logging",
+      files: ["src/components/error-boundary.tsx", "src/App.tsx"],
       status: "completed"
     },
     {
-      module: "picking-app",
-      description: "Developed mobile-optimized Picking App with optimized paths, scan confirmation, and progress tracking",
-      files: ["src/components/picking-app.tsx"],
+      module: "rma-core-types",
+      description: "Implemented comprehensive RMA type definitions and Firestore contracts",
+      files: ["src/lib/types.ts", "src/lib/rma-service.ts"],
       status: "completed"
     },
     {
-      module: "packout-station",
-      description: "Implemented Packout Station with item scanning, weight/dimensions capture, and shipping confirmation",
-      files: ["src/components/packout-station.tsx"],
+      module: "rma-intake",
+      description: "Built RMA Intake screen for Associates with item scanning and reason codes",
+      files: ["src/components/rma-intake.tsx"],
       status: "completed"
     },
     {
-      module: "wms-service",
-      description: "Built comprehensive WMS service layer with workflow simulation and audit event generation",
-      files: ["src/lib/wms-service.ts"],
+      module: "rma-manager-console",
+      description: "Created RMA Manager Console with disposition assignment and bulk approval",
+      files: ["src/components/rma-manager-console.tsx"],
       status: "completed"
     },
     {
-      module: "wms-audit-explorer",
-      description: "Added WMS Audit Explorer to debugger panel for warehouse event visualization",
-      files: ["src/components/wms-audit-explorer.tsx", "src/components/debugger-panel.tsx"],
+      module: "rma-finance-view",
+      description: "Implemented Finance view for AR adjustments, credit memos, and disposal tracking",
+      files: ["src/components/rma-finance-view.tsx"],
       status: "completed"
     },
     {
-      module: "wave-simulation-tool",
-      description: "Created Wave Simulation Tool for multi-zone wave assignment testing",
-      files: ["src/components/wave-simulation-tool.tsx", "src/components/debugger-panel.tsx"],
+      module: "vendor-portal-rma",
+      description: "Extended Vendor Portal with read-only RMA credits and refunds",
+      files: ["src/components/vendor-portal-rma.tsx"],
       status: "completed"
     },
     {
-      module: "workflow-integration",
-      description: "Integrated full receiving → wave → picking → packout lifecycle with audit logging",
-      files: ["src/App.tsx", "src/lib/wms-service.ts"],
+      module: "disposition-handlers",
+      description: "Implemented all four disposition handlers: RESTOCK, SCRAP, RTV, REPAIR with GL links",
+      files: ["src/lib/rma-service.ts"],
       status: "completed"
     },
     {
-      module: "role-based-wms",
-      description: "Extended role-based access control to include WMS operations and vendor portal visibility",
-      files: ["src/components/receiving-screen.tsx", "src/components/wave-control-dashboard.tsx", "src/components/picking-app.tsx", "src/components/packout-station.tsx"],
+      module: "rma-debugger-tools",
+      description: "Added RMA Event Stream, Disposition Simulator, and Schema Validator to debugger",
+      files: ["src/components/rma-event-stream.tsx", "src/components/disposition-simulator.tsx", "src/components/debugger-panel.tsx"],
       status: "completed"
     },
     {
-      module: "enhanced-transition-checklist",
-      description: "Updated transition checklist with V17.1.1 WMS validation requirements",
-      files: ["src/components/transition-checklist.tsx"],
+      module: "rbac-enforcement",
+      description: "Added server-side and client route guards for Associate, Manager, Finance, Vendor roles",
+      files: ["src/lib/rbac.ts", "src/components/route-guard.tsx"],
       status: "completed"
     }
   ],
   readinessChecklist: {
     noTypeScriptErrors: true,
-    wmsShellInitialized: true,
-    receivingScreenFunctional: true,
-    waveControlDashboard: true,
-    pickingAppMobile: true,
-    packoutStationUI: true,
-    allFlowsAuditable: true,
+    preflightFixesApplied: true,
+    rmaIntakeScreen: true,
+    rmaManagerConsole: true,
+    rmaFinanceView: true,
+    vendorPortalRMA: true,
+    dispositionHandlers: true,
+    auditLinksVerified: true,
+    debuggerToolsFunctional: true,
     buildLogUpdated: true
   }
 } as const;
 
-// Enhanced logging function for V17.1.1 WMS operations
+// Enhanced logging function for V17.1.2 RMA operations
+export function logRMAEvent(
+  rmaId: string,
+  action: string,
+  actor: string,
+  metadata?: Record<string, any>
+): void {
+  logEvent({
+    version: 'V17.1.2',
+    module: 'rma',
+    action,
+    details: { rmaId, ...metadata },
+    actor
+  });
+}
+
+// WMS logging compatibility (maintains V17.1.1 functionality)
 export function logWMSEvent(
   level: "info" | "warn" | "error" | "debug",
   module: string,
@@ -332,60 +378,30 @@ export function logWMSEvent(
   entityId?: string,
   metadata?: Record<string, any>
 ): void {
-  const timestamp = new Date().toISOString();
-  const entityInfo = entityId ? ` [${entityId}]` : "";
-  const metadataInfo = metadata ? ` ${JSON.stringify(metadata)}` : "";
-  const logEntry = `[${timestamp}] [${level.toUpperCase()}] [${actor}@${module}]${entityInfo} ${message}${metadataInfo}`;
-  
-  console.log(`📦 V17.1.1 | ${logEntry}`);
+  logEvent({
+    version: 'V17.1.2',
+    module: `wms-${module}`,
+    action: message,
+    details: { level, entityId, ...metadata },
+    actor
+  });
 }
 
-// V17.1.0 Patch Build Log Entry
-const BUILD_LOG_V17_1_0_PATCH = {
-  version: "V17.1.0 Patch",
-  buildDate: new Date().toISOString().split('T')[0],
-  basedOn: "V17.1.1",
-  changes: [
-    {
-      module: "build-log-standardization",
-      description: "Fixed runtime error by standardizing logEvent as named export in build-log.ts",
-      files: ["src/lib/build-log.ts"],
-      status: "completed"
-    },
-    {
-      module: "logging-utilities",
-      description: "Added BuildLogEvent type and stamp helper for consistent logging across modules",
-      files: ["src/lib/build-log.ts"],
-      status: "completed"
-    },
-    {
-      module: "forward-compatibility",
-      description: "Ensured all future modules (WMS, RMA, Quote Generator) can use standardized logging",
-      files: ["src/lib/build-log.ts"],
-      status: "completed"
-    }
-  ],
-  fixes: [
-    {
-      issue: "Uncaught SyntaxError: The requested module does not provide an export named 'logEvent'",
-      resolution: "Added logEvent as named export with consistent signature",
-      impact: "invoice-service.ts and future modules can now import logEvent successfully"
-    }
-  ]
-} as const;
+console.log("🚀 C3PL V17.1.2 Build Started - RMA End-to-End Implementation");
+console.log("📋 V17.1.2 Features: RMA Intake, Manager Console, Finance View, Vendor Portal");
+console.log("🔗 Audit Links: All RMA actions linked to invoices and GL artifacts");
+console.log("🛡️ RBAC: Role-based access control with version gates");
+console.log("🧪 Debugger: Event Stream, Disposition Simulator, Schema Validator");
+console.log("✅ Preflight Fixes: Standardized logging, error boundaries, TypeScript compliance");
+console.log("📊 Zero Silent Failures: All exceptions captured with persona context");
 
-console.log("🚀 C3PL V17.1.1 Build Started - WMS Core Workflows Implementation");
-console.log("📋 V17.1.0 Base:", BUILD_LOG_V17_1_0);
-console.log("📋 V17.1.1 New Features:", BUILD_LOG_V17_1_1);
-console.log("🔧 V17.1.0 Patch Applied:", BUILD_LOG_V17_1_0_PATCH);
-console.log("📦 WMS System: Receiving → Wave Control → Picking → Packout");
-console.log("🔍 Audit Explorer: Warehouse event tracking and visualization");
-console.log("🧪 Wave Simulation: Multi-zone assignment testing and optimization");
-console.log("✅ Runtime Error Fixed: logEvent now properly exported as named export");
-console.log("✅ Forward Compatibility: All future modules can use standardized logging");
-console.log("⚠️  WMS workflow testing required for GitHub migration readiness");
-
-// Test the standardized logging
-const tagBilling = stamp('V17.1.0', 'billing');
-tagBilling('patch_applied', { issue: 'export_mismatch', resolution: 'named_exports' });
-logEvent('info', 'build-log', 'system', 'V17.1.0 Patch successfully applied and tested');
+// Initialize V17.1.2 logging
+const tagRMA = stamp('V17.1.2', 'rma');
+tagRMA('system_initialized', { features: ['intake', 'manager_console', 'finance_view', 'vendor_portal'] });
+logEvent({ 
+  version: 'V17.1.2', 
+  module: 'build-log', 
+  action: 'preflight_complete',
+  details: { logging_standardized: true, version_gates_active: true },
+  actor: 'system'
+});

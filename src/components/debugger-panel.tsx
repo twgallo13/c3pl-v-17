@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Terminal, Settings, Check, Network, FileText, Bug, Receipt, Waves } from "@phosphor-icons/react";
+import { User, Terminal, Settings, Check, Network, FileText, Bug, Receipt, Waves, RotateCcw } from "@phosphor-icons/react";
 import { useKV } from "@github/spark/hooks";
 import { useState } from "react";
 import { VERSION, UserRole, QAUser, LogEntry } from "@/lib/types";
@@ -18,6 +18,8 @@ import { ErrorReplayer } from "./error-replayer";
 import { ExportParityChecker } from "./export-parity-checker";
 import { WMSAuditExplorer } from "./wms-audit-explorer";
 import { WaveSimulationTool } from "./wave-simulation-tool";
+import { RMAEventStream } from "./rma-event-stream";
+import { DispositionSimulator } from "./disposition-simulator";
 
 interface DebuggerPanelProps {
   className?: string;
@@ -96,29 +98,36 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs defaultValue="controls" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-9 text-xs">
             <TabsTrigger value="controls">Controls</TabsTrigger>
             <TabsTrigger value="network">
-              <Network size={16} className="mr-1" />
+              <Network size={14} className="mr-1" />
               Network
             </TabsTrigger>
             <TabsTrigger value="schema">
-              <FileText size={16} className="mr-1" />
+              <FileText size={14} className="mr-1" />
               Schema
             </TabsTrigger>
             <TabsTrigger value="invoices">
-              <Receipt size={16} className="mr-1" />
+              <Receipt size={14} className="mr-1" />
               Invoices
             </TabsTrigger>
+            <TabsTrigger value="rma-events">
+              <RotateCcw size={14} className="mr-1" />
+              RMA Events
+            </TabsTrigger>
+            <TabsTrigger value="rma-sim">
+              RMA Sim
+            </TabsTrigger>
             <TabsTrigger value="wms-audit">
-              <Waves size={16} className="mr-1" />
+              <Waves size={14} className="mr-1" />
               WMS Audit
             </TabsTrigger>
             <TabsTrigger value="wave-sim">
               Wave Sim
             </TabsTrigger>
             <TabsTrigger value="errors">
-              <Bug size={16} className="mr-1" />
+              <Bug size={14} className="mr-1" />
               Errors
             </TabsTrigger>
           </TabsList>
@@ -226,6 +235,14 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
 
           <TabsContent value="invoices">
             <ExportParityChecker />
+          </TabsContent>
+
+          <TabsContent value="rma-events">
+            <RMAEventStream />
+          </TabsContent>
+
+          <TabsContent value="rma-sim">
+            <DispositionSimulator />
           </TabsContent>
 
           <TabsContent value="wms-audit">

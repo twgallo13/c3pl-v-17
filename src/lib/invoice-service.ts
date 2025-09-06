@@ -2,7 +2,7 @@ import { Invoice, InvoiceStatus, InvoiceLifecycleEvent, ExportParityResult, User
 import { logEvent, stamp } from "./build-log";
 
 // Pre-stamp version + module for consistent billing logs
-const tagBilling = stamp('V17.1.0', 'billing');
+const tagBilling = stamp('V17.1.2', 'billing');
 
 // Mock Firestore service for invoice operations
 export class InvoiceService {
@@ -149,7 +149,7 @@ export class InvoiceService {
       this.invoices.set(invoice.id, invoice);
     });
 
-    logEvent("info", "Invoice Service", "system", "Mock invoice data initialized for V17.1.0");
+    tagBilling('mock_data_initialized', { invoiceCount: mockInvoices.length });
   }
 
   async getInvoices(userRole: UserRole, vendorId?: string): Promise<Invoice[]> {
@@ -161,10 +161,10 @@ export class InvoiceService {
         filteredInvoices = filteredInvoices.filter(invoice => invoice.vendorId === vendorId);
       }
 
-      logEvent("info", "Invoice Service", "system", `Retrieved ${filteredInvoices.length} invoices for role: ${userRole}`);
+      tagBilling('invoices_retrieved', { count: filteredInvoices.length, userRole });
       return filteredInvoices;
     } catch (error) {
-      logEvent("error", "Invoice Service", "system", `Failed to retrieve invoices: ${error}`);
+      tagBilling('invoices_retrieval_failed', { error: String(error), userRole }, 'system');
       throw error;
     }
   }
@@ -174,20 +174,20 @@ export class InvoiceService {
       const invoice = this.invoices.get(id);
       
       if (!invoice) {
-        logEvent("warn", "Invoice Service", "system", `Invoice not found: ${id}`);
+        tagBilling('invoice_not_found', { invoiceId: id }, 'system');
         return null;
       }
 
       // Apply role-based access control
       if (userRole === "Vendor" && vendorId && invoice.vendorId !== vendorId) {
-        logEvent("warn", "Invoice Service", "system", `Access denied to invoice ${id} for vendor ${vendorId}`);
+        tagBilling('invoice_access_denied', { invoiceId: id, vendorId }, 'system');
         return null;
       }
 
-      logEvent("info", "Invoice Service", "system", `Retrieved invoice: ${id}`);
+      tagBilling('invoice_retrieved', { invoiceId: id }, 'system');
       return invoice;
     } catch (error) {
-      logEvent("error", "Invoice Service", "system", `Failed to retrieve invoice ${id}: ${error}`);
+      tagBilling('invoice_retrieval_failed', { invoiceId: id, error: String(error) }, 'system');
       throw error;
     }
   }
@@ -219,9 +219,17 @@ export class InvoiceService {
       this.lifecycleEvents.push(lifecycleEvent);
       this.invoices.set(invoiceId, invoice);
 
-      logEvent("info", "Invoice Service", actor, `Invoice ${invoiceId} status updated: ${previousStatus} → ${newStatus}`);
+      tagBilling('invoice_status_updated', { 
+        invoiceId, 
+        previousStatus, 
+        newStatus,
+        invoiceNumber: invoice.invoiceNumber 
+      }, actor);
     } catch (error) {
-      logEvent("error", "Invoice Service", actor, `Failed to update invoice status: ${error}`);
+      tagBilling('invoice_status_update_failed', { 
+        invoiceId, 
+        error: String(error) 
+      }, actor);
       throw error;
     }
   }
@@ -249,10 +257,14 @@ export class InvoiceService {
         type: this.getContentType(format) 
       });
 
-      logEvent("info", "Invoice Service", actor, `Invoice ${invoiceId} exported as ${format}`);
+      tagBilling('invoice_exported', { invoiceId, format }, actor);
       return blob;
     } catch (error) {
-      logEvent("error", "Invoice Service", actor, `Failed to export invoice ${invoiceId}: ${error}`);
+      tagBilling('invoice_export_failed', { 
+        invoiceId, 
+        format, 
+        error: String(error) 
+      }, actor);
       throw error;
     }
   }
@@ -281,10 +293,16 @@ export class InvoiceService {
         });
       }
 
-      logEvent("info", "Invoice Service", actor, `Export parity validated for invoice ${invoiceId}`);
+      tagBilling('export_parity_validated', { 
+        invoiceId, 
+        resultsCount: results.length 
+      }, actor);
       return results;
     } catch (error) {
-      logEvent("error", "Invoice Service", actor, `Failed to validate export parity: ${error}`);
+      tagBilling('export_parity_validation_failed', { 
+        invoiceId, 
+        error: String(error) 
+      }, actor);
       throw error;
     }
   }
