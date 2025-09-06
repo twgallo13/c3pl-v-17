@@ -50968,6 +50968,7 @@ src/components/packout-station.tsx
 src/components/payments-console-placeholder.tsx
 src/components/payments-console.tsx
 src/components/picking-app.tsx
+src/components/products-view.tsx
 src/components/quote-generator.tsx
 src/components/quote-simulator.tsx
 src/components/rbac-gate.tsx
@@ -51003,6 +51004,7 @@ src/lib/finance-api.ts
 src/lib/finance-math.ts
 src/lib/gl-posting.ts
 src/lib/invoice-service.ts
+src/lib/products-api.ts
 src/lib/rbac-build-fix-summary.ts
 src/lib/rbac-test.ts
 src/lib/rbac.ts
