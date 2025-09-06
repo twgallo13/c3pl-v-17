@@ -17,17 +17,19 @@ import VendorPortalRMA from "@/components/vendor-portal-rma";
 import { FinanceDashboard } from "@/components/finance-dashboard";
 import { RMAAdjustmentsView } from "@/components/rma-adjustments-view";
 import { PaymentsConsole } from "@/components/payments-console";
+import { QuoteGenerator } from "@/components/quote-generator";
+import { BenchmarksImport } from "@/components/benchmarks-import";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useKV } from "@github/spark/hooks";
 import { UserRole, Invoice } from "@/lib/types";
 import { useState } from "react";
-import { Receipt, ArrowLeft, Package, Waves, Scan, Truck, RotateCcw, ClipboardList, DollarSign, Eye, TrendingUp, Calculator } from "@phosphor-icons/react";
+import { Receipt, ArrowLeft, Package, Waves, Scan, Truck, RotateCcw, ClipboardList, DollarSign, Eye, TrendingUp, Calculator, Database, FileText } from "@phosphor-icons/react";
 import "@/lib/build-log";
 
 function App() {
   const [currentRole] = useKV<UserRole>("c3pl-current-role", "Admin");
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "payments-console" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "payments-console" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma" | "quote-generator" | "benchmarks-import">("dashboard");
   
   const handleSelectInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -97,7 +99,7 @@ function App() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Build:</span>
-                      <span className="ml-2 font-mono">V17.1.4</span>
+                      <span className="ml-2 font-mono">V17.2.0</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Environment:</span>
@@ -149,6 +151,24 @@ function App() {
                   >
                     <Calculator className="h-4 w-4 mr-2" />
                     RMA Adjustments
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("quote-generator")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Quote Generator
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setCurrentView("benchmarks-import")}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Database className="h-4 w-4 mr-2" />
+                    Benchmarks Import
                   </Button>
                   
                   <Button 
@@ -324,6 +344,21 @@ function App() {
           />
         )}
 
+        {/* V17.2.0 Quote Generator & Benchmarks Import */}
+        {currentView === "quote-generator" && (
+          <QuoteGenerator
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
+        {currentView === "benchmarks-import" && (
+          <BenchmarksImport
+            userRole={currentRole}
+            onBack={handleBackToDashboard}
+          />
+        )}
+
         {selectedInvoice && (
           <InvoiceDetail
             invoice={selectedInvoice}
@@ -334,7 +369,7 @@ function App() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground pt-6 border-t">
-          C3PL V17.1.4 - Payments Console: Payment Processing, Bank Reconciliation, AR Aging, Dunning Management
+          C3PL V17.2.0 - Quote Generator: 5-Step Wizard, Benchmarks Import, Pricing Engine with Competitor Comparison
         </footer>
         </div>
       </div>

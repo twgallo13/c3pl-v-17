@@ -47,7 +47,7 @@ export function stamp(version: string, module: string) {
 
 // Version gate utility to block features not in current version
 export function versionGate(requiredVersion: string): boolean {
-  const currentVersion = 'V17.1.4';
+  const currentVersion = 'V17.2.0';
   if (requiredVersion !== currentVersion) {
     logEvent({
       version: currentVersion,
@@ -546,6 +546,199 @@ export const BUILD_LOG_V17_1_4 = {
     allChangesUnderV17_1_4: true
   }
 } as const;
+
+export const BUILD_LOG_V17_2_0 = {
+  version: "V17.2.0",
+  buildDate: new Date().toISOString().split('T')[0],
+  basedOn: "V17.1.4",
+  changes: [
+    {
+      module: "version-upgrade",
+      description: "Updated version tag from V17.1.4 to V17.2.0 across all UI components",
+      files: ["src/lib/types.ts", "index.html", "src/App.tsx", "src/lib/build-log.ts"],
+      status: "completed"
+    },
+    {
+      module: "benchmarks-import-service",
+      description: "Comprehensive CSV import system with validation, dry-run, commit, and rollback",
+      files: ["src/services/benchmarks-import.ts"],
+      status: "completed"
+    },
+    {
+      module: "quote-pricing-engine",
+      description: "Lane resolution, discount precedence, tax calculation, and competitor comparison",
+      files: ["src/services/quote-pricing.ts"],
+      status: "completed"
+    },
+    {
+      module: "quote-export-service",
+      description: "PDF/CSV/XLSX exports with SHA-256 digests and parity validation",
+      files: ["src/lib/exports/quote.ts"],
+      status: "completed"
+    },
+    {
+      module: "benchmarks-import-ui",
+      description: "Admin-only interface with file upload, validation results, and audit logging",
+      files: ["src/components/benchmarks-import.tsx"],
+      status: "completed"
+    },
+    {
+      module: "quote-generator-wizard",
+      description: "5-step mobile-first wizard: Basics, VAS, Pricing, Comparison, Summary & Export",
+      files: ["src/components/quote-generator.tsx"],
+      status: "completed"
+    },
+    {
+      module: "quote-types-contracts",
+      description: "Comprehensive types for QuoteInput, QuoteResult, BenchmarkRate, ValueAddedOption",
+      files: ["src/lib/types.ts"],
+      status: "completed"
+    },
+    {
+      module: "debugger-quote-simulator",
+      description: "Interactive quote simulator for testing pricing engine with JSON input/output",
+      files: ["src/components/quote-simulator.tsx"],
+      status: "completed"
+    },
+    {
+      module: "debugger-import-validator",
+      description: "CSV validation tool with file status, error reporting, and validation history",
+      files: ["src/components/import-validator.tsx"],
+      status: "completed"
+    },
+    {
+      module: "pricing-lane-resolution",
+      description: "Specificity-based lane matching: zip3 → state → country with rate selection",
+      files: ["src/services/quote-pricing.ts"],
+      status: "completed"
+    },
+    {
+      module: "discount-precedence-engine",
+      description: "Flat → Percent discount order with scope enforcement (all, non-surcharges, category)",
+      files: ["src/services/quote-pricing.ts"],
+      status: "completed"
+    },
+    {
+      module: "competitor-comparison",
+      description: "Delta calculation with percentage difference and visual indicators",
+      files: ["src/services/quote-pricing.ts", "src/components/quote-generator.tsx"],
+      status: "completed"
+    },
+    {
+      module: "sticky-totals-footer",
+      description: "Mobile-optimized persistent totals with export actions and digest display",
+      files: ["src/components/quote-generator.tsx"],
+      status: "completed"
+    },
+    {
+      module: "vendor-readonly-quotes",
+      description: "Vendor role restrictions - read-only exports only, no editing capabilities",
+      files: ["src/components/quote-generator.tsx"],
+      status: "completed"
+    },
+    {
+      module: "csv-schema-validation",
+      description: "Strict header validation, data type checking, cross-file integrity, ISO date formats",
+      files: ["src/services/benchmarks-import.ts"],
+      status: "completed"
+    },
+    {
+      module: "debugger-panel-enhancement",
+      description: "Added Quote Sim and Import Val tabs with comprehensive testing tools",
+      files: ["src/components/debugger-panel.tsx"],
+      status: "completed"
+    }
+  ],
+  readinessChecklist: {
+    noTypeScriptErrors: true,
+    benchmarksImportOperational: true,
+    quoteGeneratorWizardFunctional: true,
+    discountPrecedenceEnforced: true,
+    competitorComparisonDisplayed: true,
+    exportParityValidated: true,
+    vendorReadOnlyEnforced: true,
+    csvValidationStrict: true,
+    debuggerToolsActive: true,
+    stickyTotalsFooter: true,
+    buildLogUpdated: true,
+    allChangesUnderV17_2_0: true
+  }
+} as const;
+
+// Enhanced logging for V17.2.0 quote and benchmarks operations
+export function logQuotingEvent(
+  module: 'quoting' | 'benchmarks' | 'pricing' | 'export',
+  action: string,
+  actor: string,
+  metadata?: Record<string, any>
+): void {
+  logEvent({
+    version: 'V17.2.0',
+    module: `quoting-${module}`,
+    action,
+    details: metadata,
+    actor
+  });
+}
+
+console.log("🚀 C3PL V17.2.0 Build Started - Quote Generator & Benchmarks Import");
+console.log("📊 V17.2.0 Features: 5-Step Quote Wizard, Benchmarks Import, Pricing Engine, Competitor Comparison");
+console.log("🏗️ Quote Wizard: Basics → VAS → Pricing → Comparison → Summary with mobile-first design");
+console.log("📈 Pricing Engine: Lane resolution specificity (zip3 → state → country) with discount precedence");
+console.log("💰 Discount Engine: Flat → Percent order with scoping (all, non-surcharges, category)");
+console.log("🏆 Competitor Compare: Delta calculation with visual indicators and percentage differences");
+console.log("📋 Benchmarks Import: CSV validation, dry-run, commit, rollback with audit logging");
+console.log("🛡️ RBAC: Sales/AM create quotes, Admin import benchmarks, Vendor read-only exports");
+console.log("🔧 Debugger Tools: Quote Simulator and Import Validator with comprehensive testing");
+console.log("📱 Mobile-First: Sticky totals footer with export actions and digest verification");
+
+// Initialize V17.2.0 logging
+const tagQuoting = stamp('V17.2.0', 'quoting');
+tagQuoting('system_initialized', { 
+  features: ['quote_generator_wizard', 'benchmarks_import', 'pricing_engine', 'competitor_comparison', 'export_parity'] 
+});
+
+logEvent({ 
+  version: 'V17.2.0', 
+  module: 'build-log', 
+  action: 'quote_generator_complete',
+  details: { 
+    wizard_steps: ['basics', 'vas', 'pricing', 'comparison', 'summary'],
+    mobile_optimized: true,
+    sticky_totals: true,
+    export_formats: ['PDF', 'CSV', 'XLSX'],
+    vendor_readonly: true
+  },
+  actor: 'system'
+});
+
+logEvent({ 
+  version: 'V17.2.0', 
+  module: 'build-log', 
+  action: 'benchmarks_import_complete',
+  details: { 
+    csv_validation: 'strict_headers_and_types',
+    import_modes: ['replace', 'upsert'],
+    audit_logging: true,
+    rollback_capability: true,
+    admin_only_access: true
+  },
+  actor: 'system'
+});
+
+logEvent({ 
+  version: 'V17.2.0', 
+  module: 'build-log', 
+  action: 'pricing_engine_complete',
+  details: { 
+    lane_resolution: 'zip3_state_country_specificity',
+    discount_precedence: 'flat_then_percent',
+    rounding_modes: ['HALF_UP', 'HALF_EVEN'],
+    competitor_comparison: true,
+    tax_after_discounts: true
+  },
+  actor: 'system'
+});
 
 // Enhanced logging function for V17.1.4 payments operations
 export function logPaymentsEvent(

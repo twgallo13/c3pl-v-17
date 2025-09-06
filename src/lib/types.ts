@@ -1,4 +1,4 @@
-export const VERSION = "V17.1.4" as const;
+export const VERSION = "V17.2.0" as const;
 
 export type UserRole = "Vendor" | "Account Manager" | "Customer Service" | "Operations" | "Admin" | "Finance" | "Associate" | "Manager";
 
@@ -543,5 +543,133 @@ export interface AppState {
   rmaEvents: RMAEvent[];
   creditMemos: CreditMemo[];
   glJournals: GLJournalEntry[];
-  currentView: "dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma" | "payments-console";
+  currentView: "dashboard" | "invoices" | "finance-dashboard" | "rma-adjustments" | "receiving" | "wave-control" | "picking" | "packout" | "rma-intake" | "rma-manager" | "rma-finance" | "vendor-portal-rma" | "payments-console" | "quote-generator" | "benchmarks-import";
+}
+
+// V17.2.0 Quote Generator & Benchmarks Types
+export interface Lane {
+  origin: {
+    country: string;
+    state?: string;
+    zip3?: string;
+  };
+  dest: {
+    country: string;
+    state?: string;
+    zip3?: string;
+  };
+}
+
+export interface QuoteInput {
+  version_id: string;
+  lane: Lane;
+  volumes: {
+    units_received?: number;
+    orders_shipped?: number;
+  };
+  vas?: {
+    code: string;
+    qty: number;
+  }[];
+  surcharges?: {
+    code: string;
+    qty: number;
+  }[];
+  discounts?: {
+    code: string;
+    basis: 'flat' | 'percent';
+    value: number;
+    apply_to: 'all' | 'non_surcharges' | `category:${string}`;
+  }[];
+  assumptions?: {
+    storage_months?: number;
+  };
+  competitor_baseline?: {
+    label: string;
+    amount: number;
+    currency: 'USD';
+  };
+}
+
+export interface QuoteLine {
+  category: 'Receiving' | 'Fulfillment' | 'Storage' | 'VAS' | 'Surcharge';
+  code: string;
+  qty: number;
+  uom: 'per_unit' | 'per_order' | 'per_month' | 'flat';
+  rate: number;
+  amount: number;
+  discountable: boolean;
+}
+
+export interface QuoteResult {
+  lines: QuoteLine[];
+  totals: {
+    before_discounts: number;
+    discounts_total: number;
+    after_discounts: number;
+    taxes: number;
+    grand_total: number;
+  };
+  comparison?: {
+    competitor_amount: number;
+    delta_amount: number;
+    delta_percent: number;
+  };
+}
+
+export interface BenchmarkRate {
+  version_id: string;
+  mode: string;
+  service_level: string;
+  origin_country: string;
+  origin_state?: string;
+  origin_zip3?: string;
+  dest_country: string;
+  dest_state?: string;
+  dest_zip3?: string;
+  effective_start_date: string;
+  effective_end_date: string;
+  weight_min_kg: number;
+  weight_max_kg: number;
+  volume_min_cbm: number;
+  volume_max_cbm: number;
+  unit: string;
+  rate_benchmark: number;
+  currency: string;
+  accessorial_code?: string;
+  source_tag: string;
+  confidence: number;
+}
+
+export interface ValueAddedOption {
+  version_id: string;
+  code: string;
+  name: string;
+  pricing_type: string;
+  unit: string;
+  default_rate: number;
+  currency: string;
+  category: string;
+  notes?: string;
+  source_tag: string;
+  confidence: number;
+}
+
+export interface BenchmarksImportResult {
+  import_id: string;
+  version_id: string;
+  imported_at: string;
+  imported_by: string;
+  status: 'validated' | 'committed' | 'rolled_back';
+  files: {
+    benchmark_rates?: number;
+    value_added_options?: number;
+    category_mapping?: number;
+    industry_sources?: number;
+    region_mapping?: number;
+  };
+  validation_errors: string[];
+  cross_file_errors: string[];
+  warnings: string[];
+  checksum: string;
 }

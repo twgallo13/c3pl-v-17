@@ -1,4 +1,4 @@
-# C3PL V17.1.4 - Product Requirements Document
+# C3PL V17.2.0 - Product Requirements Document
 
 ## Version History
 - **V17.0.0**: Initial release with QA login, role switcher, console output toggle, basic debugger
@@ -8,144 +8,183 @@
 - **V17.1.2**: RMA end-to-end with disposition handlers, audit links, and finance integration
 - **V17.1.3**: Finance hardening with GL posting, export parity, advanced math, and dashboard
 - **V17.1.4**: Payments Console with bank reconciliation, AR aging enhancements, and dunning automation
+- **V17.2.0**: Quote Generator wizard and Benchmarks Import with pricing engine and competitor comparison
 
 ## Core Purpose & Success
 
-**Mission Statement**: C3PL is a comprehensive financial operations and warehouse management system that provides real-time payment processing, bank reconciliation, AR aging analysis, and automated dunning with enterprise-grade audit trails.
+**Mission Statement**: C3PL is a comprehensive financial operations and warehouse management system that provides automated quote generation, benchmark data management, payment processing, bank reconciliation, and pricing intelligence with enterprise-grade audit trails.
 
 **Success Indicators**: 
-- Payments applied across multiple invoices with correct residual balances
-- Bank reconciliation matching receipts with transaction references
-- AR aging totals equal sum of open invoice balances
-- Dunning export generated with correct stages and amounts
-- Remittance export parity passing (UI vs PDF/CSV)
-- All payment operations logged with V17.1.4 version tracking
+- Benchmarks import validated and committed with rollback capability
+- Quotes generated with correct line itemization and totals calculation
+- Export parity passing for all quote formats (PDF/CSV/XLSX) with stored digests
+- Competitor comparison computed and displayed with delta percentages
+- Lane resolution working with zip3 → state → country specificity
+- Discount precedence enforced (flat → percent) with correct scoping
+- All quote and benchmark operations logged with V17.2.0 version tracking
 
-**Experience Qualities**: Professional, Automated, Comprehensive
+**Experience Qualities**: Intelligent, Precise, Comparative
 
 ## Project Classification & Approach
 
-**Complexity Level**: Complex Enterprise Application with payment processing, bank reconciliation, AR management, and automated dunning
-**Primary User Activity**: Processing, Reconciling, and Managing - users process payments, reconcile bank feeds, and manage customer collections
+**Complexity Level**: Complex Enterprise Application with quote generation, benchmarks management, pricing intelligence, and competitive analysis
+**Primary User Activity**: Creating, Analyzing, and Comparing - users create quotes with benchmarks, analyze pricing scenarios, and compare against competitors
 
 ## Essential Features
 
-### V17.1.4 Payments Features
+### V17.2.0 Quote Generator Features
 
-#### 1. Payments Console
-- **Functionality**: Finance/Admin interface for comprehensive payment management
-- **Purpose**: Centralized payment processing with role-based access control
-- **Success Criteria**: Four functional tabs (Receipts, Unapplied, Reconciliation, Dunning), RBAC enforced, real-time status updates
+#### 1. 5-Step Quote Generation Wizard
+- **Functionality**: Mobile-first wizard progressing through Basics → VAS → Pricing → Comparison → Summary
+- **Purpose**: Guided quote creation with progressive disclosure and mobile optimization
+- **Success Criteria**: All steps navigable, sticky totals footer, mobile-responsive design, vendor read-only mode
 
-#### 2. Payment Processing Service
-- **Functionality**: Record, apply, and reconcile payments with GL integration
-- **Purpose**: Complete payment lifecycle with automatic invoice status updates
-- **Success Criteria**: Payments split across multiple invoices, GL entries balanced, status transitions accurate
+#### 2. Benchmarks Import System (Admin Only)
+- **Functionality**: CSV import with validation, dry-run, commit, and rollback capabilities
+- **Purpose**: Maintain accurate benchmark data with version control and audit trail
+- **Success Criteria**: Strict CSV validation, cross-file integrity checks, import/rollback tracking, admin-only access
 
-#### 3. Bank Reconciliation Engine
-- **Functionality**: CSV import with automatic matching by amount, date, and reference
-- **Purpose**: Streamline bank reconciliation with intelligent matching algorithms
-- **Success Criteria**: High-confidence matches identified, manual override capability, reconciliation status tracking
+#### 3. Pricing Engine with Lane Resolution
+- **Functionality**: Specificity-based rate selection (zip3 → state → country) with discount precedence
+- **Purpose**: Accurate pricing based on geographic specificity and business rules
+- **Success Criteria**: Lane matching works correctly, discount order enforced (flat → percent), taxes applied after discounts
 
-#### 4. Enhanced AR Aging Widget
-- **Functionality**: Clickable aging buckets with filtered invoice navigation
-- **Purpose**: Visual AR analysis with drill-down capability
-- **Success Criteria**: Buckets calculate correctly, click-through functionality, progress bar visualization
+#### 4. Competitor Comparison Analysis
+- **Functionality**: Side-by-side comparison with delta calculation and percentage differences
+- **Purpose**: Competitive positioning with visual indicators for win/loss scenarios  
+- **Success Criteria**: Delta amounts calculated correctly, percentage differences displayed, visual win/loss indicators
 
-#### 5. Dunning Automation
-- **Functionality**: Automated dunning queue generation with configurable rules
-- **Purpose**: Streamline collections process with systematic follow-up
-- **Success Criteria**: Queue generated based on terms, stages calculated correctly, export functionality operational
+#### 5. Export System with Parity Validation
+- **Functionality**: PDF/CSV/XLSX exports with SHA-256 digests and parity checking
+- **Purpose**: Professional quote documentation with data integrity guarantees
+- **Success Criteria**: All export formats match UI totals, digests stored, parity validation passing
 
-#### 6. Remittance Advice
-- **Functionality**: Generate payment advice with export parity checking
-- **Purpose**: Professional payment documentation with data integrity
-- **Success Criteria**: PDF/CSV exports match UI totals, digests stored, parity validation passing
-- **Success Criteria**: Invoice status updates to 'paid', optional GL entries balanced, payment history tracking
+#### 6. Debugger Enhancement Tools
+- **Functionality**: Quote Simulator and Import Validator in debugger panel
+- **Purpose**: Development and testing tools for pricing logic validation
+- **Success Criteria**: JSON input/output testing, CSV validation preview, error reporting
 
-#### 5. Finance Dashboard
-- **Functionality**: AR Aging, Open Invoices, Recent GL Posts with filtering
-- **Purpose**: Real-time visibility into financial position and activity
-- **Success Criteria**: AR aging by buckets (0-30, 31-60, 61-90, >90 days), filterable GL activity
-
-#### 6. Enhanced Invoice Detail
-- **Functionality**: GL Journal links and comprehensive totals display
-- **Purpose**: Complete financial artifact traceability and audit capability
-- **Success Criteria**: GL journal drawer with entries, enhanced totals (Before → After Discounts → Taxes → Grand Total)
-
-#### 7. RMA Adjustments View
-- **Functionality**: Financial adjustments from RMA processing with GL links
-- **Purpose**: Visibility into all RMA-generated financial artifacts
-- **Success Criteria**: Artifact type, amount, GL journal ID, posted date columns
-
-#### 8. Export Parity Debugger
-- **Functionality**: Compare UI totals to export totals with digest verification
-- **Purpose**: Debug and validate export consistency during development
-- **Success Criteria**: Format-specific comparison, digest display, discrepancy identification
+### V17.2.0 RBAC & Access Control
+- **Sales/Account Manager**: Create and export quotes, read benchmarks
+- **Admin**: Full benchmark import/export/rollback, all quote functions
+- **Vendor**: Read-only access to quotes sent to them, no editing capabilities
+- **Finance/CS/Ops**: Read access to quotes and benchmarks, no creation rights
 
 ## Design Direction
 
 ### Visual Tone & Identity
-**Emotional Response**: Professional confidence, systematic control, debugging clarity
-**Design Personality**: Technical precision with enterprise-grade polish
-**Visual Metaphors**: Dashboard, control panel, diagnostic interface
-**Simplicity Spectrum**: Rich interface prioritizing functionality and information density
+**Emotional Response**: Intelligent precision, competitive confidence, analytical clarity
+**Design Personality**: Strategic intelligence with enterprise-grade data presentation
+**Visual Metaphors**: Pricing wizard, competitive dashboard, benchmark laboratory
+**Simplicity Spectrum**: Progressive disclosure with mobile-first responsive design
 
 ### Color Strategy
-**Color Scheme Type**: Complementary with accent highlights
-**Primary Color**: Deep blue (oklch(0.35 0.15 250)) for primary actions and focus states
-**Secondary Colors**: Muted blue-gray for supporting elements
-**Accent Color**: Warm orange (oklch(0.62 0.25 40)) for warnings and important highlights
-**Status Colors**: 
-- Green (success, valid states)
-- Red (errors, failures)
-- Yellow (warnings, pending states)
-- Gray (neutral, disabled states)
+**Color Scheme Type**: Complementary with professional data visualization
+**Primary Color**: Deep blue (oklch(0.35 0.15 250)) for primary actions and quote totals
+**Secondary Colors**: Muted blue-gray for supporting quote elements  
+**Accent Color**: Warm orange (oklch(0.62 0.25 40)) for competitive deltas and highlights
+**Status Colors**:
+- Green (profitable quotes, validation pass)
+- Red (competitive disadvantage, validation errors) 
+- Yellow (warnings, margin alerts)
+- Gray (neutral baseline, disabled states)
 
 ### Typography System
-**Font Pairing Strategy**: Inter for UI text, JetBrains Mono for code/data display
-**Typographic Hierarchy**: Clear distinction between headers (600-700 weight), body (400 weight), and code (mono)
-**Font Personality**: Clean, technical, highly legible
-**Readability Focus**: Optimized for extended debugging sessions
+**Font Pairing Strategy**: Inter for quote UI, JetBrains Mono for pricing data and JSON
+**Typographic Hierarchy**: Clear quote totals hierarchy, competitive comparison emphasis
+**Mobile Optimization**: Responsive text sizing for quote wizard on mobile devices
+**Data Display**: Monospace for pricing precision and alignment consistency
 
-### UI Components & Layout
-**Component Usage**: 
-- Cards for feature grouping and content organization
-- Tabs for feature switching in debugger panel
-- Tables and scrollable areas for data inspection
-- Badges for status indicators and version tags
-- Buttons with clear visual hierarchy (primary, secondary, outline, destructive)
+### UI Components & Quote-Specific Layout
+**Wizard Components**:
+- Step progress indicator with clear visual progression
+- Card-based step content with consistent spacing
+- Sticky totals footer for persistent quote visibility
+- Mobile-responsive form layouts with touch-friendly controls
 
-**Component States**: 
-- Loading states for async operations
-- Error states with clear messaging
-- Success confirmations for completed actions
-- Disabled states for unavailable features
+**Quote Display Components**:
+- Itemized line tables with category badges
+- Totals breakdown with discount flow visualization  
+- Competitor comparison block with delta highlighting
+- Export action buttons with digest status indicators
+
+**Benchmark Components**:
+- File upload interface with validation status icons
+- CSV preview tables with error highlighting
+- Import progress indicators with rollback capability
+- Audit log display with timestamp and actor tracking
 
 ### Animations
-**Purposeful Motion**: Subtle transitions for state changes, smooth tab switching, gentle loading indicators
-**Performance Focus**: All animations under 300ms, no blocking transitions
+**Quote Wizard Flow**: Smooth step transitions, sticky footer animations, loading states for quote generation
+**Competitive Comparison**: Subtle animations for delta calculations and win/loss indicators
+**Import Validation**: Progress indicators, success/failure state transitions
 
 ## Technical Implementation
 
-### TypeScript Validation
-- Full type safety with proper interfaces for all data structures
-- No silent type conversions or unhandled edge cases
-- Comprehensive error boundaries with typed error handling
+### V17.2.0 Pricing Engine Architecture
+- Lane resolution with geographic specificity (zip3 → state → country)
+- Discount precedence enforcement (flat amounts before percentages)
+- Tax calculation after discounts with configurable rates
+- Rounding mode selection (HALF_UP, HALF_EVEN) with precision control
 
-### State Management
-- Persistent state using useKV hooks for cross-session data retention
-- Reactive state updates for real-time debugging information
-- Proper cleanup and memory management for debugging data
+### Benchmarks Data Management
+- CSV schema validation with strict header requirements
+- Cross-file referential integrity checking
+- Version-controlled import with rollback capability
+- Checksum generation for data integrity verification
 
-### Logging & Monitoring
-- Structured logging with actor, module, and timestamp context
-- Schema validation warnings logged with full context
-- All exceptions captured with stack traces and replay data
+### Quote Export & Parity System
+- Multi-format export generation (PDF/CSV/XLSX)
+- SHA-256 digest calculation and storage
+- UI vs export total comparison with discrepancy detection
+- Export history tracking with digest verification
 
-### Build & Compliance
-- Zero TypeScript errors in production build
-- All changes tracked and tied to version V17.0.1
+### State Management & Persistence
+- Quote wizard state preservation across browser sessions
+- Benchmark version tracking with import history
+- Export digest storage for audit trail maintenance
+- Mobile-optimized state management for responsive design
+
+### Logging & Observability
+- V17.2.0 versioned logging for all quote and benchmark operations
+- Quote generation events with line count and total tracking
+- Benchmark import events with validation results and checksums
+- Export parity events with pass/fail status and format details
+
+### Build & Quality Assurance
+- Zero TypeScript errors with comprehensive type coverage
+- Quote calculation unit tests with edge case validation
+- Benchmark import integration tests with CSV error scenarios
+- Export parity tests ensuring UI/export consistency
+- Mobile responsiveness testing across device sizes
+- All changes tracked and tied to version V17.2.0
+
+## Transition Readiness Checklist
+
+### Development Complete
+- [ ] No TypeScript errors in console
+- [ ] Import validates and commits benchmarks, rollback restores previous state  
+- [ ] Quotes generate with correct lines/totals and comparison block
+- [ ] Export parity PASS with digests recorded for PDF/CSV/XLSX
+- [ ] Sticky totals footer functional on mobile devices
+- [ ] Vendor read-only mode prevents quote editing
+- [ ] Build log includes all V17.2.0 changes
+
+### Quality Validation
+- [ ] Lane resolution precedence working (zip3 → state → country)
+- [ ] Discount order enforced (flat → percent) with correct scoping
+- [ ] Competitor comparison calculates deltas and percentages correctly
+- [ ] CSV validation rejects malformed data with specific error messages
+- [ ] Quote wizard mobile-responsive across all steps
+- [ ] Debugger tools (Quote Sim, Import Val) functional with test data
+
+### Production Ready  
+- [ ] All quote operations logged with V17.2.0 version stamps
+- [ ] RBAC enforced (Sales create, Admin import, Vendor readonly)
+- [ ] Export digests stored and verified for data integrity
+- [ ] Benchmark rollback tested with sample import data
+- [ ] Performance acceptable on mobile devices with large quotes
+- [ ] Ready for GitHub migration with complete feature documentation
 - Complete audit trail for GitHub migration readiness
 
 ## Transition Readiness Checklist

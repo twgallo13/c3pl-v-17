@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Terminal, Settings, Check, Network, FileText, Bug, Receipt, Waves, RotateCcw } from "@phosphor-icons/react";
+import { User, Terminal, Settings, Check, Network, FileText, Bug, Receipt, Waves, RotateCcw, Calculator, Database } from "@phosphor-icons/react";
 import { useKV } from "@github/spark/hooks";
 import { useState } from "react";
 import { VERSION, UserRole, QAUser, LogEntry } from "@/lib/types";
@@ -21,6 +21,8 @@ import { WMSAuditExplorer } from "./wms-audit-explorer";
 import { WaveSimulationTool } from "./wave-simulation-tool";
 import { RMAEventStream } from "./rma-event-stream";
 import { DispositionSimulator } from "./disposition-simulator";
+import { QuoteSimulator } from "./quote-simulator";
+import { ImportValidator } from "./import-validator";
 
 interface DebuggerPanelProps {
   className?: string;
@@ -99,7 +101,7 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs defaultValue="controls" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-9 text-xs">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-11 text-xs">
             <TabsTrigger value="controls">Controls</TabsTrigger>
             <TabsTrigger value="network">
               <Network size={14} className="mr-1" />
@@ -130,6 +132,14 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
             </TabsTrigger>
             <TabsTrigger value="wave-sim">
               Wave Sim
+            </TabsTrigger>
+            <TabsTrigger value="quote-sim">
+              <Calculator size={14} className="mr-1" />
+              Quote Sim
+            </TabsTrigger>
+            <TabsTrigger value="import-val">
+              <Database size={14} className="mr-1" />
+              Import Val
             </TabsTrigger>
             <TabsTrigger value="errors">
               <Bug size={14} className="mr-1" />
@@ -260,6 +270,14 @@ export function DebuggerPanel({ className }: DebuggerPanelProps) {
 
           <TabsContent value="wave-sim">
             <WaveSimulationTool />
+          </TabsContent>
+
+          <TabsContent value="quote-sim">
+            <QuoteSimulator />
+          </TabsContent>
+
+          <TabsContent value="import-val">
+            <ImportValidator />
           </TabsContent>
 
           <TabsContent value="errors">
