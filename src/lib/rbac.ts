@@ -1,6 +1,7 @@
 /**
- * C3PL V17.1.2 Role-Based Access Control
+ * C3PL V17.1.2 Role-Based Access Control - Core Logic
  * Server-side and client route guards for secure feature access
+ * Pure TypeScript logic - no JSX components
  */
 
 import { UserRole } from "./types";
@@ -240,30 +241,4 @@ export const rbacService = RBACService.getInstance();
 // Convenience function for components
 export function useRBAC(userRole: UserRole, permission: string, actor?: string): AccessCheckResult {
   return rbacService.checkAccess(userRole, permission, actor);
-}
-
-export function withRBACGuard<T extends Record<string, any>>(
-  Component: React.ComponentType<T>,
-  permission: string
-) {
-  return function GuardedComponent(props: T & { userRole: UserRole, actor?: string }) {
-    const { userRole, actor = "component", ...componentProps } = props;
-    const access = useRBAC(userRole, permission, actor);
-    
-    if (!access.allowed) {
-      return (
-        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-          <h3 className="font-medium text-destructive">Access Denied</h3>
-          <p className="text-sm text-destructive/80 mt-1">{access.reason}</p>
-          {access.requiredRoles && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Required roles: {access.requiredRoles.join(", ")}
-            </p>
-          )}
-        </div>
-      );
-    }
-    
-    return <Component {...(componentProps as T)} />;
-  };
 }

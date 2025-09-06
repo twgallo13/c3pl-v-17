@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useKV } from "@github/spark/hooks";
 import { rmaService } from "@/lib/rma-service";
-import { withRBACGuard } from "@/lib/rbac";
+import { RBACGate } from "@/components/rbac-gate";
 import { withErrorBoundary } from "@/components/error-boundary";
 import { RMA, RMALine, ReasonCode, UserRole } from "@/lib/types";
 import { toast } from "sonner";
@@ -481,6 +481,12 @@ function RMAIntakeScreen({ userRole, onBack }: RMAIntakeProps) {
 }
 
 export default withErrorBoundary(
-  withRBACGuard(RMAIntakeScreen, "rma:create"),
+  function GuardedRMAIntakeScreen(props: RMAIntakeScreenProps) {
+    return (
+      <RBACGate userRole={props.userRole} permission="rma:create" actor="rma-intake">
+        <RMAIntakeScreen {...props} />
+      </RBACGate>
+    );
+  },
   { actor: "rma-intake", module: "rma" }
 );

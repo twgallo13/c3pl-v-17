@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { rmaService } from "@/lib/rma-service";
-import { withRBACGuard } from "@/lib/rbac";
+import { RBACGate } from "@/components/rbac-gate";
 import { withErrorBoundary } from "@/components/error-boundary";
 import { RMA, CreditMemo, UserRole } from "@/lib/types";
 import { 
@@ -335,6 +335,12 @@ function VendorPortalRMA({ userRole, vendorId = "vendor-001", onBack }: VendorPo
 }
 
 export default withErrorBoundary(
-  withRBACGuard(VendorPortalRMA, "rma:vendor_portal"),
+  function GuardedVendorPortalRMA(props: VendorPortalRMAProps) {
+    return (
+      <RBACGate userRole={props.userRole} permission="rma:vendor_portal" actor="vendor-portal-rma">
+        <VendorPortalRMA {...props} />
+      </RBACGate>
+    );
+  },
   { actor: "vendor-portal-rma", module: "rma" }
 );

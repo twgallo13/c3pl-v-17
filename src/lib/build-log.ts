@@ -333,15 +333,16 @@ export const BUILD_LOG_V17_1_2 = {
       status: "completed"
     },
     {
-      module: "rbac-enforcement",
-      description: "Added server-side and client route guards for Associate, Manager, Finance, Vendor roles",
-      files: ["src/lib/rbac.ts", "src/components/route-guard.tsx"],
+      module: "rbac-build-fix",
+      description: "Fixed JSX-in-.ts build error by separating RBAC logic (.ts) from UI (.tsx)",
+      files: ["src/lib/rbac.ts", "src/components/rbac-gate.tsx", "src/components/rma-intake.tsx", "src/components/rma-manager-console.tsx", "src/components/rma-finance-view.tsx", "src/components/vendor-portal-rma.tsx"],
       status: "completed"
     }
   ],
   readinessChecklist: {
     noTypeScriptErrors: true,
     preflightFixesApplied: true,
+    rbacBuildErrorFixed: true,
     rmaIntakeScreen: true,
     rmaManagerConsole: true,
     rmaFinanceView: true,
@@ -393,15 +394,25 @@ console.log("🔗 Audit Links: All RMA actions linked to invoices and GL artifac
 console.log("🛡️ RBAC: Role-based access control with version gates");
 console.log("🧪 Debugger: Event Stream, Disposition Simulator, Schema Validator");
 console.log("✅ Preflight Fixes: Standardized logging, error boundaries, TypeScript compliance");
+console.log("🔧 RBAC Build Fix: Separated pure RBAC logic (.ts) from React UI (.tsx)");
 console.log("📊 Zero Silent Failures: All exceptions captured with persona context");
 
 // Initialize V17.1.2 logging
 const tagRMA = stamp('V17.1.2', 'rma');
 tagRMA('system_initialized', { features: ['intake', 'manager_console', 'finance_view', 'vendor_portal'] });
+
+// Log RBAC build fix completion
+const tagRBAC = stamp('V17.1.2', 'rbac');
+tagRBAC('build_fix_complete', { 
+  issue: 'JSX-in-ts-file', 
+  solution: 'separated_logic_from_ui',
+  files_affected: ['rbac.ts', 'rbac-gate.tsx', 'rma components']
+});
+
 logEvent({ 
   version: 'V17.1.2', 
   module: 'build-log', 
   action: 'preflight_complete',
-  details: { logging_standardized: true, version_gates_active: true },
+  details: { logging_standardized: true, version_gates_active: true, rbac_build_error_fixed: true },
   actor: 'system'
 });

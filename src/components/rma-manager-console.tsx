@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useKV } from "@github/spark/hooks";
 import { rmaService } from "@/lib/rma-service";
-import { withRBACGuard } from "@/lib/rbac";
+import { RBACGate } from "@/components/rbac-gate";
 import { withErrorBoundary } from "@/components/error-boundary";
 import { RMA, RMALine, DispositionType, UserRole } from "@/lib/types";
 import { toast } from "sonner";
@@ -541,6 +541,12 @@ function RMAManagerConsole({ userRole, onBack }: RMAManagerConsoleProps) {
 }
 
 export default withErrorBoundary(
-  withRBACGuard(RMAManagerConsole, "rma:disposition"),
+  function GuardedRMAManagerConsole(props: RMAManagerConsoleProps) {
+    return (
+      <RBACGate userRole={props.userRole} permission="rma:disposition" actor="rma-manager">
+        <RMAManagerConsole {...props} />
+      </RBACGate>
+    );
+  },
   { actor: "rma-manager", module: "rma" }
 );

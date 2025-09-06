@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { rmaService } from "@/lib/rma-service";
-import { withRBACGuard } from "@/lib/rbac";
+import { RBACGate } from "@/components/rbac-gate";
 import { withErrorBoundary } from "@/components/error-boundary";
 import { RMA, CreditMemo, GLJournalEntry, UserRole } from "@/lib/types";
 import { 
@@ -285,6 +285,12 @@ function RMAFinanceView({ userRole, onBack }: RMAFinanceViewProps) {
 }
 
 export default withErrorBoundary(
-  withRBACGuard(RMAFinanceView, "rma:finance_view"),
+  function GuardedRMAFinanceView(props: RMAFinanceViewProps) {
+    return (
+      <RBACGate userRole={props.userRole} permission="rma:finance_view" actor="rma-finance">
+        <RMAFinanceView {...props} />
+      </RBACGate>
+    );
+  },
   { actor: "rma-finance", module: "rma" }
 );
