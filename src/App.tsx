@@ -7,7 +7,7 @@ import { getRole, subscribe, type Role } from '@/lib/role-store';
 import { checkAccess } from '@/lib/rbac';
 import { setActiveVersion } from '@/lib/version';
 
-const VERSION = 'V17.1.2-p7e-fix2';
+const VERSION = 'V17.1.2-p7e-fix3';
 setActiveVersion(VERSION);
 
 function landingFor(role: Role): string {
