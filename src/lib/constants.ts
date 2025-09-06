@@ -1,6 +1,6 @@
 import { QAUser, UserRole, LogEntry } from "./types";
 
-export const APP_VERSION = "V17.0.1";
+export const APP_VERSION = "V17.1.0";
 
 export const QA_USER: QAUser = {
   id: "qa-user-001",
@@ -14,7 +14,8 @@ export const USER_ROLES: UserRole[] = [
   "Account Manager", 
   "Customer Service",
   "Operations",
-  "Admin"
+  "Admin",
+  "Finance"
 ];
 
 export function createLogEntry(

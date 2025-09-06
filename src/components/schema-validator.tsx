@@ -84,6 +84,64 @@ export function SchemaValidator() {
         data: { name: "Test User", active: true },
         createdAt: new Date().toISOString(),
         version: 1
+      },
+      "invoice-schema": {
+        id: "inv-001",
+        invoiceNumber: "INV-2024-001",
+        clientId: "client-001",
+        clientName: "Acme Corporation",
+        status: "Issued",
+        issuedDate: "2024-01-15",
+        dueDate: "2024-02-15",
+        lineItems: [
+          {
+            id: "line-001",
+            description: "Professional Services",
+            quantity: 1,
+            unitPrice: 10000,
+            amount: 10000
+          }
+        ],
+        totals: {
+          subtotal: 10000,
+          discounts: 500,
+          taxes: 950,
+          grandTotal: 10450
+        },
+        notes: [
+          {
+            id: "note-001",
+            type: "vendor",
+            content: "Standard payment terms apply",
+            createdAt: "2024-01-15T10:00:00Z",
+            createdBy: "vendor-001"
+          }
+        ],
+        vendorId: "vendor-001",
+        createdAt: "2024-01-15T09:00:00Z",
+        updatedAt: "2024-01-15T10:30:00Z",
+        createdBy: "system",
+        updatedBy: "admin-001"
+      },
+      "invoice-line-item": {
+        id: "line-001",
+        description: "Professional Services Q1",
+        quantity: 1,
+        unitPrice: 10000,
+        amount: 10000
+      },
+      "invoice-totals": {
+        subtotal: 10000,
+        discounts: 500,
+        taxes: 950,
+        grandTotal: 10450
+      },
+      "invoice-note": {
+        id: "note-001",
+        type: "vendor",
+        content: "Payment terms: Net 30 days",
+        createdAt: "2024-01-15T10:00:00Z",
+        createdBy: "vendor-001"
       }
     };
 
@@ -114,6 +172,46 @@ export function SchemaValidator() {
         collection: "",
         // Missing required data field
         version: "not-a-number"
+      },
+      "invoice-schema": {
+        id: 123, // Should be string
+        invoiceNumber: "INVALID-FORMAT", // Should match INV-YYYY-NNN pattern
+        clientId: "client-001",
+        clientName: "Acme Corporation",
+        status: "InvalidStatus", // Should be Draft|Issued|Paid|Void
+        dueDate: "invalid-date",
+        lineItems: [], // Should not be empty
+        totals: {
+          subtotal: "not-a-number", // Should be number
+          discounts: -100, // Should be >= 0
+          taxes: "invalid",
+          grandTotal: -500
+        },
+        notes: "not-an-array", // Should be array
+        createdAt: "invalid-date",
+        updatedAt: "invalid-date",
+        createdBy: "",
+        updatedBy: ""
+      },
+      "invoice-line-item": {
+        id: 123, // Should be string
+        description: "",
+        quantity: -1, // Should be > 0
+        unitPrice: "not-a-number",
+        amount: -100
+      },
+      "invoice-totals": {
+        subtotal: -100, // Should be >= 0
+        discounts: "invalid",
+        taxes: -50,
+        grandTotal: "not-a-number"
+      },
+      "invoice-note": {
+        id: 123, // Should be string
+        type: "invalid-type", // Should be vendor|internal
+        content: "",
+        createdAt: "invalid-date",
+        createdBy: ""
       }
     };
 

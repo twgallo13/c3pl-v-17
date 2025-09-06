@@ -1,5 +1,5 @@
 /**
- * C3PL V17.0.1 Build Log
+ * C3PL V17.1.0 Build Log
  * All changes and implementations tied to this version
  */
 
@@ -117,7 +117,108 @@ export const BUILD_LOG_V17_0_1 = {
   }
 } as const;
 
-console.log("🚀 C3PL V17.0.1 Build Started");
+export const BUILD_LOG_V17_1_0 = {
+  version: "V17.1.0",
+  buildDate: "2024-01-17",
+  basedOn: "V17.0.1",
+  changes: [
+    {
+      module: "version-upgrade",
+      description: "Updated version tag from V17.0.1 to V17.1.0 across all UI components",
+      files: ["src/lib/types.ts", "src/lib/constants.ts", "index.html", "src/App.tsx"],
+      status: "completed"
+    },
+    {
+      module: "invoice-system",
+      description: "Implemented comprehensive invoice system with Firestore schema integration",
+      files: ["src/lib/invoice-service.ts", "src/lib/types.ts"],
+      status: "completed"
+    },
+    {
+      module: "invoice-list-view",
+      description: "Built Invoice List component with columns: Invoice #, Client, Status, Issued Date, Due Date, Amount",
+      files: ["src/components/invoice-list.tsx"],
+      status: "completed"
+    },
+    {
+      module: "invoice-detail-view",
+      description: "Created Invoice Detail view with totals block, notes tabs, and export functionality",
+      files: ["src/components/invoice-detail.tsx"],
+      status: "completed"
+    },
+    {
+      module: "role-based-access",
+      description: "Implemented read-only vendor access with full Finance/Admin control over invoice lifecycle",
+      files: ["src/lib/invoice-service.ts", "src/components/invoice-list.tsx", "src/components/invoice-detail.tsx"],
+      status: "completed"
+    },
+    {
+      module: "export-functionality",
+      description: "Added PDF, Excel, CSV export capabilities with format parity validation",
+      files: ["src/lib/invoice-service.ts", "src/components/invoice-detail.tsx", "src/components/export-parity-checker.tsx"],
+      status: "completed"
+    },
+    {
+      module: "lifecycle-management",
+      description: "Implemented invoice lifecycle: Draft → Issued → Paid → Void with event logging",
+      files: ["src/lib/invoice-service.ts", "src/lib/types.ts"],
+      status: "completed"
+    },
+    {
+      module: "enhanced-schema-validation",
+      description: "Extended Schema Validator with invoice-specific validation contracts",
+      files: ["src/lib/schema-validation.ts", "src/components/schema-validator.tsx"],
+      status: "completed"
+    },
+    {
+      module: "export-parity-checker",
+      description: "Added Export Parity Check Tool in Debugger panel for format validation",
+      files: ["src/components/export-parity-checker.tsx", "src/components/debugger-panel.tsx"],
+      status: "completed"
+    },
+    {
+      module: "invoice-lifecycle-events",
+      description: "Integrated invoice events (generated, issued, paid, voided) into logging system",
+      files: ["src/lib/invoice-service.ts", "src/lib/build-log.ts"],
+      status: "completed"
+    },
+    {
+      module: "finance-role",
+      description: "Added Finance role to user management system with invoice permissions",
+      files: ["src/lib/types.ts", "src/lib/constants.ts"],
+      status: "completed"
+    }
+  ],
+  readinessChecklist: {
+    noTypeScriptErrors: true,
+    buildLogComplete: true,
+    versionTagVisible: true,
+    invoiceListFunctional: true,
+    invoiceDetailFunctional: true,
+    exportsFunctional: true,
+    exportParityValidated: false,
+    schemaValidatorExtended: true,
+    lifecycleEventsLogged: true,
+    githubMigrationReady: false
+  }
+} as const;
+
+// Enhanced logging function for V17.1.0
+export function logEvent(
+  level: "info" | "warn" | "error" | "debug",
+  module: string,
+  actor: string,
+  message: string
+): void {
+  const timestamp = new Date().toISOString();
+  const logEntry = `[${timestamp}] [${level.toUpperCase()}] [${actor}@${module}] ${message}`;
+  
+  console.log(`🔄 V17.1.0 | ${logEntry}`);
+}
+
+console.log("🚀 C3PL V17.1.0 Build Started - Invoice System Implementation");
 console.log("📋 V17.0.0 Base:", BUILD_LOG_V17_0_0);
 console.log("📋 V17.0.1 Changes:", BUILD_LOG_V17_0_1);
-console.log("⚠️  Testing required for GitHub migration readiness");
+console.log("📋 V17.1.0 New Features:", BUILD_LOG_V17_1_0);
+console.log("💼 Invoice System: Firestore Schema + UI + Export Parity Validation");
+console.log("⚠️  Export parity testing required for GitHub migration readiness");

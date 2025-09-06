@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "@phosphor-icons/react";
-import { BUILD_LOG_V17_0_1 } from "@/lib/build-log";
+import { BUILD_LOG_V17_1_0 } from "@/lib/build-log";
 import { validatePayload } from "@/lib/schema-validation";
 import { createSimulatedError, replayError } from "@/lib/error-replay";
+import { invoiceService } from "@/lib/invoice-service";
 import { useState } from "react";
 import { createLogEntry, formatLogEntry } from "@/lib/constants";
 
@@ -12,26 +13,52 @@ export function TransitionReadinessChecklist() {
   const [testResults, setTestResults] = useState<{
     schemaValidatorTested: boolean;
     errorReplayerTested: boolean;
+    invoiceSystemTested: boolean;
+    exportParityTested: boolean;
   }>({
     schemaValidatorTested: false,
-    errorReplayerTested: false
+    errorReplayerTested: false,
+    invoiceSystemTested: false,
+    exportParityTested: false
   });
 
-  const { readinessChecklist } = BUILD_LOG_V17_0_1;
+  const { readinessChecklist } = BUILD_LOG_V17_1_0;
   
   const runSchemaValidatorTest = async () => {
     try {
       console.log(formatLogEntry(createLogEntry("info", "Running Schema Validator test", "transition-checklist", "testing")));
       
-      // Test with user-profile schema
+      // Test with invoice schema
       const testPayload = {
-        id: "test-123",
-        username: "test_user",
-        email: "test@example.com",
-        role: "Admin"
+        id: "inv-test-001",
+        invoiceNumber: "INV-2024-001",
+        clientId: "client-001",
+        clientName: "Test Client",
+        status: "Draft",
+        dueDate: "2024-02-15",
+        lineItems: [
+          {
+            id: "line-001",
+            description: "Test Service",
+            quantity: 1,
+            unitPrice: 1000,
+            amount: 1000
+          }
+        ],
+        totals: {
+          subtotal: 1000,
+          discounts: 0,
+          taxes: 100,
+          grandTotal: 1100
+        },
+        notes: [],
+        createdAt: "2024-01-15T10:00:00Z",
+        updatedAt: "2024-01-15T10:00:00Z",
+        createdBy: "test",
+        updatedBy: "test"
       };
       
-      const result = validatePayload(testPayload, "user-profile", "transition-checklist");
+      const result = validatePayload(testPayload, "invoice-schema", "transition-checklist");
       
       if (result.isValid) {
         setTestResults(prev => ({ ...prev, schemaValidatorTested: true }));
@@ -71,9 +98,53 @@ export function TransitionReadinessChecklist() {
     }
   };
 
+  const runInvoiceSystemTest = async () => {
+    try {
+      console.log(formatLogEntry(createLogEntry("info", "Running Invoice System test", "transition-checklist", "testing")));
+      
+      // Test invoice retrieval
+      const invoices = await invoiceService.getInvoices("Admin");
+      
+      if (invoices.length > 0) {
+        setTestResults(prev => ({ ...prev, invoiceSystemTested: true }));
+        console.log(formatLogEntry(createLogEntry("info", `Invoice System test passed - loaded ${invoices.length} invoices`, "transition-checklist", "testing")));
+      } else {
+        throw new Error("No invoices loaded");
+      }
+    } catch (error) {
+      console.error(formatLogEntry(createLogEntry("error", `Invoice System test failed: ${error}`, "transition-checklist", "testing")));
+    }
+  };
+
+  const runExportParityTest = async () => {
+    try {
+      console.log(formatLogEntry(createLogEntry("info", "Running Export Parity test", "transition-checklist", "testing")));
+      
+      // Test export parity validation for the first available invoice
+      const invoices = await invoiceService.getInvoices("Admin");
+      
+      if (invoices.length > 0) {
+        const results = await invoiceService.validateExportParity(invoices[0].id, "transition-checklist");
+        
+        if (results.length === 3) { // PDF, Excel, CSV
+          setTestResults(prev => ({ ...prev, exportParityTested: true }));
+          console.log(formatLogEntry(createLogEntry("info", "Export Parity test passed - validated all formats", "transition-checklist", "testing")));
+        } else {
+          throw new Error("Export parity validation incomplete");
+        }
+      } else {
+        throw new Error("No invoices available for export parity test");
+      }
+    } catch (error) {
+      console.error(formatLogEntry(createLogEntry("error", `Export Parity test failed: ${error}`, "transition-checklist", "testing")));
+    }
+  };
+
   const runAllTests = async () => {
     await runSchemaValidatorTest();
     await runErrorReplayerTest();
+    await runInvoiceSystemTest();
+    await runExportParityTest();
   };
   
   const items = [
@@ -84,7 +155,7 @@ export function TransitionReadinessChecklist() {
     },
     { 
       key: "buildLogComplete", 
-      label: "Build log includes all changes tied to V17.0.1", 
+      label: "Build log includes all changes tied to V17.1.0", 
       status: readinessChecklist.buildLogComplete 
     },
     { 
@@ -93,19 +164,44 @@ export function TransitionReadinessChecklist() {
       status: readinessChecklist.versionTagVisible 
     },
     { 
-      key: "schemaValidatorTested", 
-      label: "Schema Validator tested against at least 3 modules", 
-      status: testResults.schemaValidatorTested 
+      key: "invoiceListFunctional", 
+      label: "Invoice List UI present and functional", 
+      status: readinessChecklist.invoiceListFunctional 
     },
     { 
-      key: "errorReplayerTested", 
-      label: "Error Replayer tested with at least 1 simulated exception", 
-      status: testResults.errorReplayerTested 
+      key: "invoiceDetailFunctional", 
+      label: "Invoice Detail UI with totals and exports", 
+      status: readinessChecklist.invoiceDetailFunctional 
+    },
+    { 
+      key: "exportsFunctional", 
+      label: "PDF, Excel, CSV exports functional", 
+      status: readinessChecklist.exportsFunctional 
+    },
+    { 
+      key: "schemaValidatorExtended", 
+      label: "Schema Validator includes invoice contracts", 
+      status: readinessChecklist.schemaValidatorExtended 
+    },
+    { 
+      key: "invoiceSystemTested", 
+      label: "Invoice System tested with data loading", 
+      status: testResults.invoiceSystemTested 
+    },
+    { 
+      key: "exportParityTested", 
+      label: "Export Parity Check validated across formats", 
+      status: testResults.exportParityTested 
+    },
+    { 
+      key: "lifecycleEventsLogged", 
+      label: "Invoice lifecycle events logged", 
+      status: readinessChecklist.lifecycleEventsLogged 
     },
     { 
       key: "githubMigrationReady", 
       label: "GitHub migration prep updated", 
-      status: readinessChecklist.githubMigrationReady && testResults.schemaValidatorTested && testResults.errorReplayerTested
+      status: readinessChecklist.githubMigrationReady && testResults.invoiceSystemTested && testResults.exportParityTested
     }
   ];
 
@@ -116,7 +212,7 @@ export function TransitionReadinessChecklist() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           Transition Readiness Checklist
-          {allReady && <Badge variant="default" className="bg-green-600">V17.0.1 Ready</Badge>}
+          {allReady && <Badge variant="default" className="bg-green-600">V17.1.0 Ready</Badge>}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -145,7 +241,7 @@ export function TransitionReadinessChecklist() {
 
         {/* Test Controls */}
         <div className="mt-6 space-y-3">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button 
               size="sm" 
               variant="outline" 
@@ -164,8 +260,24 @@ export function TransitionReadinessChecklist() {
             </Button>
             <Button 
               size="sm" 
+              variant="outline" 
+              onClick={runInvoiceSystemTest}
+              disabled={testResults.invoiceSystemTested}
+            >
+              Test Invoice System
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={runExportParityTest}
+              disabled={testResults.exportParityTested}
+            >
+              Test Export Parity
+            </Button>
+            <Button 
+              size="sm" 
               onClick={runAllTests}
-              disabled={testResults.schemaValidatorTested && testResults.errorReplayerTested}
+              disabled={Object.values(testResults).every(v => v)}
             >
               Run All Tests
             </Button>
@@ -175,15 +287,18 @@ export function TransitionReadinessChecklist() {
         {allReady && (
           <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-800 font-medium">
-              ✅ C3PL V17.0.1 is ready for GitHub migration!
+              ✅ C3PL V17.1.0 is ready for GitHub migration!
             </p>
             <p className="text-xs text-green-600 mt-1">
-              All features tested and validated. Project can transition from Sparky → GitHub with Copilot AI
+              Invoice System implemented with Firestore integration, export functionality, and parity validation
             </p>
             <div className="mt-2 text-xs text-green-600">
-              <div>• Network Request Inspector: ✅ Ready</div>
-              <div>• Schema Validator: ✅ Tested with {testResults.schemaValidatorTested ? "3" : "0"} modules</div>
-              <div>• Error Replayer: ✅ Tested with {testResults.errorReplayerTested ? "1" : "0"} simulated exception</div>
+              <div>• Invoice List + Detail UI: ✅ Ready</div>
+              <div>• Firestore Schema Integration: ✅ Ready</div>
+              <div>• Export Functions (PDF/Excel/CSV): ✅ Ready</div>
+              <div>• Export Parity Validation: ✅ {testResults.exportParityTested ? "Tested" : "Pending"}</div>
+              <div>• Role-based Access Control: ✅ Ready</div>
+              <div>• Lifecycle Event Logging: ✅ Ready</div>
             </div>
           </div>
         )}

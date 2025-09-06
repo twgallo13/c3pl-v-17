@@ -1,6 +1,7 @@
 /**
- * Schema Validation Utilities for C3PL V17.0.1
+ * Schema Validation Utilities for C3PL V17.1.0
  * Live validation of Firestore/API payloads against contracts
+ * Enhanced with Invoice Schema Validation
  */
 
 import { SchemaValidationResult } from "./types";
@@ -33,7 +34,7 @@ export const SCHEMA_CONTRACTS: Record<string, SchemaContract> = {
     },
     validation: {
       email: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-      role: (value: string) => ["Vendor", "Account Manager", "Customer Service", "Operations", "Admin"].includes(value)
+      role: (value: string) => ["Vendor", "Account Manager", "Customer Service", "Operations", "Admin", "Finance"].includes(value)
     }
   },
   "api-request": {
@@ -66,6 +67,95 @@ export const SCHEMA_CONTRACTS: Record<string, SchemaContract> = {
       createdAt: "string",
       updatedAt: "string",
       version: "number"
+    }
+  },
+  "invoice-schema": {
+    name: "Invoice Document",
+    module: "invoice-system",
+    required: ["id", "invoiceNumber", "clientId", "clientName", "status", "dueDate", "lineItems", "totals", "notes", "createdAt", "updatedAt", "createdBy", "updatedBy"],
+    optional: ["issuedDate", "vendorId"],
+    types: {
+      id: "string",
+      invoiceNumber: "string",
+      clientId: "string",
+      clientName: "string",
+      status: "string",
+      issuedDate: "string",
+      dueDate: "string",
+      lineItems: "object",
+      totals: "object",
+      notes: "object",
+      vendorId: "string",
+      createdAt: "string",
+      updatedAt: "string",
+      createdBy: "string",
+      updatedBy: "string"
+    },
+    validation: {
+      status: (value: string) => ["Draft", "Issued", "Paid", "Void"].includes(value),
+      invoiceNumber: (value: string) => /^INV-\d{4}-\d{3}$/.test(value),
+      dueDate: (value: string) => !isNaN(Date.parse(value)),
+      lineItems: (value: any) => Array.isArray(value) && value.length > 0,
+      totals: (value: any) => {
+        return value && 
+               typeof value.subtotal === 'number' &&
+               typeof value.discounts === 'number' &&
+               typeof value.taxes === 'number' &&
+               typeof value.grandTotal === 'number';
+      }
+    }
+  },
+  "invoice-line-item": {
+    name: "Invoice Line Item",
+    module: "invoice-system",
+    required: ["id", "description", "quantity", "unitPrice", "amount"],
+    optional: [],
+    types: {
+      id: "string",
+      description: "string",
+      quantity: "number",
+      unitPrice: "number",
+      amount: "number"
+    },
+    validation: {
+      quantity: (value: number) => value > 0,
+      unitPrice: (value: number) => value >= 0,
+      amount: (value: number) => value >= 0
+    }
+  },
+  "invoice-totals": {
+    name: "Invoice Totals",
+    module: "invoice-system",
+    required: ["subtotal", "discounts", "taxes", "grandTotal"],
+    optional: [],
+    types: {
+      subtotal: "number",
+      discounts: "number",
+      taxes: "number",
+      grandTotal: "number"
+    },
+    validation: {
+      subtotal: (value: number) => value >= 0,
+      discounts: (value: number) => value >= 0,
+      taxes: (value: number) => value >= 0,
+      grandTotal: (value: number) => value >= 0
+    }
+  },
+  "invoice-note": {
+    name: "Invoice Note",
+    module: "invoice-system",
+    required: ["id", "type", "content", "createdAt", "createdBy"],
+    optional: [],
+    types: {
+      id: "string",
+      type: "string",
+      content: "string",
+      createdAt: "string",
+      createdBy: "string"
+    },
+    validation: {
+      type: (value: string) => ["vendor", "internal"].includes(value),
+      createdAt: (value: string) => !isNaN(Date.parse(value))
     }
   }
 };
